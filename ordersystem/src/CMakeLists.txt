@@ -1,0 +1,3 @@
+FILE(GLOB SRC_LIST . "*.cpp")
+#MESSAGE(STATUS "SRC_LIST = " ${SRC_LIST})
+ADD_EXECUTABLE(ordersystem ${SRC_LIST})

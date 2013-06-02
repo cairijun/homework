@@ -1,0 +1,9 @@
+*~
+*.o
+build/*
+*.dia
+*.log
+*.aux
+*.pdf
+tags
+Makefile

@@ -1,0 +1,180 @@
+\documentclass[adobefonts,a4paper]{ctexart}
+
+\usepackage[top=1.2in, bottom=1.2in, left=1.2in, right=1.2in]{geometry}
+\usepackage{fancyvrb,graphicx}
+
+%opening
+\title{实验报告}
+\author{计科一班\quad蔡日骏\quad12348003}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{问题描述}
+请设计一个点餐系统。程序运行后，首先选择用户类型，然后从文本文件读入菜单信息进行初始化，根据用户
+类型不同在控制台界面上提供不同功能选择。用户选择某项功能后，根据提示进行操作；操作完成后，能返回
+功能选择菜单重新选择，直至用户退出。
+\begin{itemize}
+ \item 客户功能
+ \begin{description}
+  \item[预订] 打印出可选菜单，提示用户选择；在用户选择后，提示用户输入个人信息，记录下信息，并保存至本地文件。
+  \item[查询/退订] 显示所有的已订的订单列表，提示输入退订订单；用户输入后，如果卖家尚未确认订单，则成功退订并
+  修改本地文件；否则提示退订失败。
+ \end{description}
+
+ \item 卖家功能
+ \begin{description}
+  \item[添加/删除菜单]菜单根据文件初始化后，卖家可以对其进行修改，包括添加和删除菜式等，修改后将新菜单保存至
+  文件，下次初始化仍可用。
+  \item[查询/修改订单] 读取本地文件，显示所有的订单及其状态，提示确认订单或不进行操作；卖家选择订单后，修改该
+  订单为确认状态。
+ \end{description}
+\end{itemize}
+
+
+\section{设计过程及讨论}
+
+ \SaveVerb{User}|User|
+ \SaveVerb{Seller}|Seller|
+ \SaveVerb{Buyer}|Buyer|
+ \SaveVerb{MenuClass}|MenuClass|
+ \SaveVerb{OrderClass}|OrderClass|
+ \SaveVerb{OrdersManager}|OrdersManager|
+ \SaveVerb{Menu}|Menu|
+ \SaveVerb{Order}|Order|
+ \SaveVerb{CSVParser}|CSVParser|
+ 
+\subsection{设计思路}
+\subsubsection{类设计}
+题目要求 \verb|Menu|类和 \verb|Order|类保存一个菜式的信息，但菜单有多个菜式，一个订单也有多个菜式，因此另外
+定义 \verb|MenuClass|类和 \verb|OrderClass|类用于保存整个菜单和一个订单。相应地，客户信息依附与某个订单，
+因此把客户信息保存在 \verb|OrderClass|中。此外，为了管理所有订单，定义了一个类 \verb|OrdersManager|。
+
+为了把面向用户的操作和面向下层数据的操作分离，定义了 \verb|User|抽象类及其超类 \verb|Seller|和 \verb|Buyer|。
+
+为了处理保存在本地文件中的数据，定义了 \verb|CSVParser|类，提供简单的CSV格式数据的解释功能，能够处理字符串及
+数字类型数据。
+\newpage
+基本设计如下：
+\begin{description}
+ 
+ \item[\UseVerb{User}] 抽象类，供 \verb|Seller|和 \verb|Buyer|类继承用。
+ 
+ \item[\UseVerb{Seller}] 继承 \verb|User|，处理卖家的所有操作请求。
+ 
+ \item[\UseVerb{Buyer}] 继承 \verb|User|，处理顾客的所有操作请求。
+ 
+ \includegraphics[width=5in]{UML}
+ 
+ \item[\UseVerb{MenuClass}] 表示一个菜单，提供对菜单的操作。
+ 
+ \includegraphics[width=4in]{UML2}
+ 
+ \item[\UseVerb{OrderClass}] 表示一个订单，提供对单个订单的操作。
+ 
+ \item[\UseVerb{OrdersManager}] 订单管理器，提供对系统内订单列表的操作。
+ 
+ \includegraphics[width=5.5in]{UML3}
+ 
+ \item[\UseVerb{Menu}] 表示菜单中的一个菜式。
+ 
+ \item[\UseVerb{Order}] 表示订单中的一个菜式，继承 \verb|Menu|。
+ 
+ \includegraphics[width=3.4in]{UML4}
+ 
+ \item[\UseVerb{CSVParser}] CSV解释器，提供对\emph{一行}CSV格式字符串的解释功能。
+ 
+ \includegraphics[width=3in]{UML5}
+ 
+\end{description}
+
+直接负责存储数据的类，包括 \verb|MenuClass|、\verb|OrderClass|、\verb|Menu|、\verb|Order|类，提供了
+把自身数据格式化成CSV格式、控制台显示格式的字符串的函数，包含它们的实例的类不必参与它们的数据输出工作。
+
+\verb|User|类及其超类、\verb|MenuClass|、\verb|OrdersManager|类在程序运行阶段分别只需要一个实例，为保证
+操作安全，这些类都禁止复制（声明但不定义私有的复制构造函数）。
+
+程序使用唯一的ID来标识菜式和订单，因此 \verb|Menu|和 \verb|OrderClass|类均有一个静态成员变量
+\verb|last_id|用来记录
+当前最大的ID，用于生成新的ID。
+
+
+\subsubsection{程序流程}
+
+程序的流程结构如下：
+
+\begin{figure}[htbp]
+\includegraphics[width=5.8in]{structure}
+\end{figure}
+
+\verb|User|类的超类向用户提供功能菜单，响应用户的操作，并根据用户的操作调用 \verb|menu|或 \verb|om|成员中的相关
+接口。\verb|menu|和 \verb|om|再根据需要进行查询或调用 \verb|Menu|类或 \verb|OrderClass|类中的相关接口完成
+用户的请求。
+
+\subsubsection{其他}
+\begin{itemize}
+ \item 程序的设计有较好的健壮性。在大多数情况下，用户的无效输入并不会造成误动作，并在一定程度上能对用户的误输入进行
+ 简单识别。如：选择菜单时要求输入小写英文字母，但实际上输入大写英文字母亦能正常工作（\emph{有一个例外：当要求
+ 用户对删除操作进行确认时，为防止误操作，只能通过大写的``Y''来进行确认。}）。
+ 在需要输入数字的地方，如果用户输入了非数字，程序会自动忽略用户的该次输入而不会造成程序出错。
+ 
+ \item 程序的数据使用CSV格式保存在\verb|menu.txt|和\verb|order.txt|文件中。其中字符串使用英文双引号包围。
+ 
+ \item 由于用户不会同时为顾客和卖家，因此程序一次运行只能以一个身份登录。如果要切换用户身份，必须退出程序重新登录。
+\end{itemize}
+
+
+\subsection{存在不足}
+目前程序存在这些缺陷：
+\begin{itemize}
+ \item 中文显示格式不工整。由于不同编码下中文存储时所占用的长度不同，不一定与其在控制台中打印时的字符宽度对应，因此在
+ UTF-8编码下输出中文时格式会错乱，目前未找到解决方法。
+ 
+ \item 没有对负责屏幕输出的代码进行足够的封装。\verb|Buyer|和 \verb|Seller|类中有大量负责屏幕输出的代码，这些
+ 代码相似甚至相同，但没有进行足够的封装，维护困难。
+ 
+ \item 无法处理字符串中的双引号。字符串中的双引号在保存在本地文件时不会被转义，再次读取时会被认为是字符串的结束而
+ 截断字符串。
+ 
+\end{itemize}
+
+
+\section{测试过程及结果讨论}
+\subsection{测试数据}
+\verb|menu.txt|及\verb|order.txt|文件已内置测试数据。
+
+\subsection{调试过程}
+调试过程中，主要遇到了如下几个关键的问题。
+
+\begin{itemize}
+ \item 早期测试时，发现如下问题：如果程序在 \verb|order.txt|中已有数据的情况下启动，顾客将无法继续添加订单，控制台
+ 输出ID已存在的错误。故障排除过程如下：
+ \begin{enumerate}
+  \item 在设计中，该错误信息不可能由用户的误操作触发，因此断定是程序逻辑的问题。
+  \item 启动程序，添加多个订单，退出程序，查看 \verb|order.txt|文件，发现数据按预定格式保存，断定故障发生在
+  第二次启动中。
+  \item \verb|Buyer|类中负责处理添加订单的函数为 \verb|add_order|函数。在该函数中下断点，第二次启动程序，进行
+  单步调试。发现 \verb|save_order|函数中调用订单对象的 \verb|save|函数时，该函数本该返回新订单的ID，即当前最大的
+  ID + 1，但实际上该函数返回了1。但1号订单已在列表中存在，因此把该订单对象添加到 \verb|OrdersManager|时出错。
+  \item 由于 \verb|save|函数返回1，推测 \verb|last_id|静态成员没有正确地记录当前最大的ID。由于第一次添加订单时
+  ID递增正常，因此推测是从 \verb|order.txt|中加载订单时 \verb|last_id|没有正确更新。
+  \item 从本地文件中加载订单数据时调用了 \verb|OrderClass::set_id()|函数设置订单对象的编号。检查该函数的定义，
+  发现没有对 \verb|last_id|静态成员变量进行更新。添加相应代码，故障解决。
+ \end{enumerate}
+ 
+ \item 测试时发现某些情况下，用户的无效输入会导致程序进入死循环。单步调试发现具体原因为程序期望读取数字，实际输入字符，
+ 导致 \verb|cin|流无效，但程序仍尝试去读取无效的输入流。解决为在检测到无效输入导致 \verb|cin|无效时，清除流的状态
+ 标志，并清空流缓冲区再尝试读取。
+ 
+\end{itemize}
+
+
+\section{小结}
+本次实验作业最大的难点在于类的设计。而题目预先定义了几个类，需要根据那几个类进行设计，更是增加了难度。
+不过本次实验作业也很好地锻炼了我理解需求并根据需求进行逻辑设计的能力。同时，通过本次作业，我认识到面向对象设计的威力。
+通过进行封装，只要接口设计良好，便能够方便地进行模块化的开发。而在调试除错过程中，只要根据类的功能和类之间的关系进行
+自顶向下的分析，即可高效地定位、修复故障。
+
+\end{document}
