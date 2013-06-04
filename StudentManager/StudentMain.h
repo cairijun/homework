@@ -24,6 +24,12 @@ private slots:
 private:
     Ui::StudentMain *ui;
     StatisticsDialog *statDialog;
+
+    Student::StudentBase *pBase;
+    Student::FacultyA *pFA;
+    Student::FacultyB *pFB;
+    Student::FacultyC *pFC;
+    Student::StudentMIS *pMIS;
 };
 
 #endif // STUDENTMAIN_H
