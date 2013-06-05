@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         StudentMain.cpp \
     LoginDialog.cpp \
     Student.cpp \
-    StatisticsDialog.cpp
+    StatisticsDialog.cpp \
+    Controller.cpp
 
 HEADERS  += StudentMain.h \
     LoginDialog.h \
     Student.h \
-    StatisticsDialog.h
+    StatisticsDialog.h \
+    Controller.h
 
 FORMS    += StudentMain.ui \
     LoginDialog.ui \

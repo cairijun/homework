@@ -3,6 +3,7 @@
 
 #include "Student.h"
 #include "StatisticsDialog.h"
+#include "Controller.h"
 #include <QWidget>
 
 namespace Ui {
@@ -21,15 +22,17 @@ public:
 private slots:
     void on_DegreeStat_clicked();
 
+    void on_StudentList_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
+
+    void on_SaveData_clicked();
+
+    void on_ResetData_clicked();
+
 private:
     Ui::StudentMain *ui;
-    StatisticsDialog *statDialog;
+    StatisticsDialog *statDialog = 0;
 
-    Student::StudentBase *pBase;
-    Student::FacultyA *pFA;
-    Student::FacultyB *pFB;
-    Student::FacultyC *pFC;
-    Student::StudentMIS *pMIS;
+    Student::IController *_controller = 0;
 };
 
 #endif // STUDENTMAIN_H

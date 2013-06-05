@@ -91,7 +91,7 @@
     </widget>
    </item>
    <item row="1" column="3" colspan="6">
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="ScoresGroupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -107,7 +107,7 @@
         <property name="currentIndex">
          <number>0</number>
         </property>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="MajorTab">
          <attribute name="title">
           <string>主修</string>
          </attribute>
@@ -199,12 +199,35 @@
               <property name="sortingEnabled">
                <bool>true</bool>
               </property>
+              <property name="rowCount">
+               <number>20</number>
+              </property>
               <attribute name="horizontalHeaderVisible">
                <bool>true</bool>
               </attribute>
               <attribute name="horizontalHeaderStretchLastSection">
                <bool>true</bool>
               </attribute>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
               <column>
                <property name="text">
                 <string>科目</string>
@@ -226,7 +249,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_2">
+        <widget class="QWidget" name="MinorTab">
          <attribute name="title">
           <string>辅修</string>
          </attribute>
@@ -315,9 +338,32 @@
               <property name="sortingEnabled">
                <bool>true</bool>
               </property>
+              <property name="rowCount">
+               <number>20</number>
+              </property>
               <attribute name="horizontalHeaderStretchLastSection">
                <bool>true</bool>
               </attribute>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
               <column>
                <property name="text">
                 <string>科目</string>
@@ -557,6 +603,9 @@
      <property name="sortingEnabled">
       <bool>true</bool>
      </property>
+     <property name="rowCount">
+      <number>100</number>
+     </property>
      <property name="columnCount">
       <number>2</number>
      </property>
@@ -566,6 +615,106 @@
      <attribute name="horizontalHeaderStretchLastSection">
       <bool>true</bool>
      </attribute>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
      <column>
       <property name="text">
        <string>学号</string>

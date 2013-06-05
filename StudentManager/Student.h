@@ -52,6 +52,7 @@ private:
     int _age;
 
 public:
+    Student() = default;
     /**
      * @brief Student 使用学生基本信息初始化学生对象
      * @param name 姓名
@@ -81,6 +82,11 @@ public:
     QString getAddress() const
     {
         return _address;
+    }
+
+    int getAge() const
+    {
+        return _age;
     }
 
     bool operator==(const Student &other) const
@@ -177,10 +183,10 @@ public:
 /**
  * @brief The IFaculty class
  *
- *专业类(Faculty*)的公共抽象基类。包含成绩列表以及相关的各种操作。
+ *专业类(Faculty*)的基类。包含成绩列表以及相关的各种操作。
  *由于不同专业的数据不共享，专业类**不**应该对本类进行虚继承。
  */
-class IFaculty
+class IFaculty: virtual protected StudentBase
 {
 protected:
     QMap<long, QMap<QString, int> > _majorStudentScores, _minorStudentScores;
@@ -195,31 +201,9 @@ public:
      * @param k 辅修课程数
      */
     IFaculty(int s, int k): _s(s), _k(k) {}
+    virtual ~IFaculty() {}
     virtual void makeReport(const char *header);
     virtual void saveAStudentScores(long ID, QMap<QString, int> scores);
-};
-
-
-/**
- * @brief The FacultyA class
- */
-class FacultyA: public IFaculty, virtual private StudentBase
-{
-private:
-    static const char *_FILENAME_MAJOR;
-    static const char *_FILENAME_MINOR;
-
-public:
-    FacultyA(int s = 6, int k = 5)
-        :StudentBase(), IFaculty(s, k)
-    {
-        IFaculty::_loadDataFromFile(FacultyA::_FILENAME_MAJOR, FacultyA::_FILENAME_MINOR);
-    }
-
-    ~FacultyA()
-    {
-        IFaculty::_saveDataToFile(_FILENAME_MAJOR, _FILENAME_MINOR);
-    }
 
     using StudentBase::loadStudentList;
     using StudentBase::loadAStudentDetails;
@@ -227,7 +211,31 @@ public:
 };
 
 
-class FacultyB: public IFaculty, virtual private StudentBase
+/**
+ * @brief The FacultyA class
+ */
+class FacultyA: public IFaculty
+{
+private:
+    static const char *_FILENAME_MAJOR;
+    static const char *_FILENAME_MINOR;
+
+public:
+    FacultyA(int s = 6, int k = 5)
+        :IFaculty(s, k)
+    {
+        IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
+    }
+
+    ~FacultyA()
+    {
+        IFaculty::_saveDataToFile(_FILENAME_MAJOR, _FILENAME_MINOR);
+    }
+
+};
+
+
+class FacultyB: public IFaculty
 {
 private:
     static const char *_FILENAME_MAJOR;
@@ -235,7 +243,7 @@ private:
 
 public:
     FacultyB(int s = 7, int k = 4)
-        :StudentBase(), IFaculty(s, k)
+        :IFaculty(s, k)
     {
         IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
@@ -245,12 +253,9 @@ public:
         IFaculty::_saveDataToFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
 
-    using StudentBase::loadStudentList;
-    using StudentBase::loadAStudentDetails;
-    using StudentBase::testStudentID;
 };
 
-class FacultyC: public IFaculty, virtual private StudentBase
+class FacultyC: public IFaculty
 {
 private:
     static const char *_FILENAME_MAJOR;
@@ -258,7 +263,7 @@ private:
 
 public:
     FacultyC(int s = 5, int k = 3)
-        :StudentBase(), IFaculty(s, k)
+        :IFaculty(s, k)
     {
         IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
@@ -268,15 +273,15 @@ public:
         IFaculty::_saveDataToFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
 
-    using StudentBase::loadStudentList;
-    using StudentBase::loadAStudentDetails;
-    using StudentBase::testStudentID;
 };
 
 
 class StudentMIS: public FacultyA, public FacultyB, public FacultyC
 {
-
+public:
+    using StudentBase::loadStudentList;
+    using StudentBase::loadAStudentDetails;
+    using StudentBase::testStudentID;
 };
 
 }

@@ -13,7 +13,9 @@ namespace Student
  */
 bool StudentBase::_loadDataFromFile()
 {
-
+    const QString &t = "abc";
+    _studentList[12348003] = Student("Richard Tsai", 12348003, false, 19, "SYSU");
+    _studentList[12348004] = Student("Someone", 12348004, true, 18, "SYSU");
 }
 
 /**
