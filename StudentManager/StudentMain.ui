@@ -103,7 +103,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="QTabWidget" name="tabWidget">
+       <widget class="QTabWidget" name="ScoresTab">
         <property name="currentIndex">
          <number>0</number>
         </property>
@@ -741,7 +741,7 @@
   <tabstop>FemaleRadio</tabstop>
   <tabstop>AgeBox</tabstop>
   <tabstop>AddressBox</tabstop>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>ScoresTab</tabstop>
   <tabstop>MajorScoreList</tabstop>
   <tabstop>AddMajorScore</tabstop>
   <tabstop>DeleteMajorScore</tabstop>

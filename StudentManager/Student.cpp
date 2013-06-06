@@ -13,9 +13,11 @@ namespace Student
  */
 bool StudentBase::_loadDataFromFile()
 {
-    const QString &t = "abc";
+    //const QString &t = "abc";
     _studentList[12348003] = Student("Richard Tsai", 12348003, false, 19, "SYSU");
     _studentList[12348004] = Student("Someone", 12348004, true, 18, "SYSU");
+    _studentList[12348005] = Student("AAA", 12348005, false, 19, "ABC");
+    _studentList[12348006] = Student("XXX", 12348006, false, 20, "frlkajsl");
 }
 
 /**
@@ -51,7 +53,39 @@ bool StudentBase::testStudentID(long ID)
 
 bool IFaculty::_loadDataFromFile(const char *majorFileName, const char *minorFileName)
 {
-
+    if(majorFileName == QString("AMajor.dat"))
+    {
+        _majorStudentScores[12348003] = QMap<QString, int>();
+        auto p = &_majorStudentScores[12348003];
+        p->operator []("C1") = 100;
+        p->operator []("C2") = 50;
+        _minorStudentScores[12348004] = QMap<QString, int>();
+        p = &_minorStudentScores[12348004];
+        p->operator []("C1") = 60;
+        p->operator []("C2") = 50;
+    }
+    if(majorFileName == QString("BMajor.dat"))
+    {
+        _majorStudentScores[12348004] = QMap<QString, int>();
+        auto p = &_majorStudentScores[12348004];
+        p->operator []("C1") = 76;
+        p->operator []("C2") = 9;
+        _minorStudentScores[12348005] = QMap<QString, int>();
+        p = &_minorStudentScores[12348005];
+        p->operator []("C1") = 90;
+        p->operator []("C2") = 15;
+    }
+    if(majorFileName == QString("CMajor.dat"))
+    {
+        _majorStudentScores[12348005] = QMap<QString, int>();
+        auto p = &_majorStudentScores[12348005];
+        p->operator []("C1") = 46;
+        p->operator []("C2") = 80;
+        _minorStudentScores[12348003] = QMap<QString, int>();
+        p = &_minorStudentScores[12348003];
+        p->operator []("C1") = 90;
+        p->operator []("C2") = 90;
+    }
 }
 
 bool IFaculty::_saveDataToFile(const char *majorFileName, const char *minorFileName)
@@ -59,12 +93,12 @@ bool IFaculty::_saveDataToFile(const char *majorFileName, const char *minorFileN
 
 }
 
-void IFaculty::makeReport(const char *header)
+void IFaculty::makeReport()
 {
 
 }
 
-void IFaculty::saveAStudentScores(long ID, QMap<QString, int> scores)
+void IFaculty::saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores)
 {
 
 }

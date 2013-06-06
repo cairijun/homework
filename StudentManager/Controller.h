@@ -46,6 +46,36 @@ protected:
         });
     }
 
+    template<typename T>
+    void loadScores(T *modelObj, long ID, bool isMajor)
+    {
+        if(isMajor == true)
+            _ui->MajorScoreList->clear();
+        else
+            _ui->MinorScoreList->clear();
+
+        int rowNo = 0;
+        auto pTableObj = isMajor ?
+                    _ui->MajorScoreList :
+                    _ui->MinorScoreList;
+
+        pTableObj->setSortingEnabled(false);
+        QString facultyName = modelObj->loadAStudentScores(
+                    ID, isMajor,
+                    [pTableObj, &rowNo](const QString &courseName, int score){
+            pTableObj->setItem(rowNo, 0, new QTableWidgetItem(courseName));
+            pTableObj->setItem(rowNo, 1, new QTableWidgetItem(QString::number(score)));
+            pTableObj->setItem(rowNo, 2, new QTableWidgetItem(score >= 60 ? "PASS" : "FAIL"));
+            ++rowNo;
+        });
+        pTableObj->setSortingEnabled(true);
+
+        if(isMajor)
+            _ui->MajorLabel->setText(facultyName);
+        else
+            _ui->MinorLabel->setText(facultyName);
+    }
+
 public:
     IController(Ui::StudentMain *ui): _ui(ui) {}
     IController(const IController &) = delete;
@@ -89,10 +119,13 @@ public:
         {
         case FACULTY_NAME_A:
             _facultyObj = new FacultyA;
+            break;
         case FACULTY_NAME_B:
             _facultyObj = new FacultyB;
+            break;
         case FACULTY_NAME_C:
             _facultyObj = new FacultyC;
+            break;
         }
     }
 
@@ -112,8 +145,7 @@ private:
     StudentMIS *_misObj = 0;
 
 public:
-    DegreesOfficeController(Ui::StudentMain *ui)
-        :IController(ui), _misObj(new StudentMIS) {}
+    DegreesOfficeController(Ui::StudentMain *ui);
 
     ~DegreesOfficeController()
     {

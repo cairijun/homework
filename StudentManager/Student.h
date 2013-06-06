@@ -143,7 +143,7 @@ public:
      *调用f，并传入学号和学生姓名。
      */
     template<typename FunType>
-    void loadStudentList(FunType f)
+    void loadStudentList(FunType f) const
     {
         for(auto i : _const(_studentList))
             f(i.getID(), i.getName());
@@ -157,7 +157,7 @@ public:
      *找到对应学号的学生，则不会调用此函数。
      */
     template<typename FunType>
-    void loadAStudentDetails(long ID, FunType f)
+    void loadAStudentDetails(long ID, FunType f) const
     {
         auto i = _studentList.constFind(ID);
         if(i != _studentList.constEnd())
@@ -190,6 +190,7 @@ class IFaculty: virtual protected StudentBase
 {
 protected:
     QMap<long, QMap<QString, int> > _majorStudentScores, _minorStudentScores;
+    QString _facultyName;
     virtual bool _loadDataFromFile(const char *majorFileName, const char *minorFileName);
     virtual bool _saveDataToFile(const char *majorFileName, const char *minorFileName);
     int _s, _k;
@@ -200,10 +201,37 @@ public:
      * @param s 主修课程数
      * @param k 辅修课程数
      */
-    IFaculty(int s, int k): _s(s), _k(k) {}
+    IFaculty(int s, int k, const QString &facultyName): _s(s), _k(k), _facultyName(facultyName) {}
     virtual ~IFaculty() {}
-    virtual void makeReport(const char *header);
-    virtual void saveAStudentScores(long ID, QMap<QString, int> scores);
+    virtual void makeReport();
+    virtual void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
+
+    bool isMajor(long ID) const
+    {
+        return _majorStudentScores.contains(ID);
+    }
+    bool isMinor(long ID) const
+    {
+        return _minorStudentScores.contains(ID);
+    }
+
+    template<typename FunType>
+    QString loadAStudentScores(long ID, bool isMajor, FunType f) const
+    {
+        auto pStudentScores = isMajor ? &_majorStudentScores : &_minorStudentScores;
+        if(pStudentScores->contains(ID))
+        {
+            for(auto i = pStudentScores->value(ID).constBegin();
+                i != pStudentScores->value(ID).constEnd(); ++i)
+                f(i.key(), i.value());
+
+            return _facultyName;
+        }
+        else
+        {
+            return "";
+        }
+    }
 
     using StudentBase::loadStudentList;
     using StudentBase::loadAStudentDetails;
@@ -222,7 +250,7 @@ private:
 
 public:
     FacultyA(int s = 6, int k = 5)
-        :IFaculty(s, k)
+        :IFaculty(s, k, "Faculty A")
     {
         IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
@@ -243,7 +271,7 @@ private:
 
 public:
     FacultyB(int s = 7, int k = 4)
-        :IFaculty(s, k)
+        :IFaculty(s, k, "Faculty B")
     {
         IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
@@ -263,7 +291,7 @@ private:
 
 public:
     FacultyC(int s = 5, int k = 3)
-        :IFaculty(s, k)
+        :IFaculty(s, k, "Faculty C")
     {
         IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
@@ -282,6 +310,17 @@ public:
     using StudentBase::loadStudentList;
     using StudentBase::loadAStudentDetails;
     using StudentBase::testStudentID;
+
+    template<typename FunType>
+    QString loadAStudentScores(long ID, bool isMajor, FunType f) const
+    {
+        QString facultyName = FacultyA::loadAStudentScores(ID, isMajor, f);
+        if(!facultyName.size())
+            facultyName = FacultyB::loadAStudentScores(ID, isMajor, f);
+        if(!facultyName.size())
+            facultyName = FacultyC::loadAStudentScores(ID, isMajor, f);
+        return facultyName;
+    }
 };
 
 }
