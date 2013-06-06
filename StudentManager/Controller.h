@@ -49,10 +49,10 @@ protected:
     template<typename T>
     void loadScores(T *modelObj, long ID, bool isMajor)
     {
-        if(isMajor == true)
-            _ui->MajorScoreList->clear();
+        if(isMajor)
+            _ui->MajorScoreList->clearContents();
         else
-            _ui->MinorScoreList->clear();
+            _ui->MinorScoreList->clearContents();
 
         int rowNo = 0;
         auto pTableObj = isMajor ?
@@ -112,22 +112,7 @@ private:
 public:
     enum FacultyName{FACULTY_NAME_A, FACULTY_NAME_B, FACULTY_NAME_C};
 
-    FacultyController(Ui::StudentMain *ui, FacultyName facultyName)
-        :IController(ui)
-    {
-        switch(facultyName)
-        {
-        case FACULTY_NAME_A:
-            _facultyObj = new FacultyA;
-            break;
-        case FACULTY_NAME_B:
-            _facultyObj = new FacultyB;
-            break;
-        case FACULTY_NAME_C:
-            _facultyObj = new FacultyC;
-            break;
-        }
-    }
+    FacultyController(Ui::StudentMain *ui, FacultyName facultyName);
 
     ~FacultyController()
     {
