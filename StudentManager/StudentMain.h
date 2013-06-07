@@ -28,6 +28,8 @@ private slots:
 
     void on_ResetData_clicked();
 
+    void on_AddStudent_clicked();
+
 private:
     Ui::StudentMain *ui;
     StatisticsDialog *statDialog = 0;

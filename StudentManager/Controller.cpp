@@ -1,6 +1,7 @@
 #include "Controller.h"
 #include<QString>
 #include<QTableWidget>
+#include<QMessageBox>
 
 #define _WIG_DIS(widget) widget->setEnabled(false)
 #define _WIG_ROL(widget) widget->setReadOnly(true)
@@ -13,19 +14,45 @@ AdmissionsOfficeController::AdmissionsOfficeController(Ui::StudentMain *ui)
     _WIG_DIS(_ui->ScoresGroupBox);
 }
 
-void AdmissionsOfficeController::loadStudentList()
+void AdmissionsOfficeController::loadStudentList() const
 {
-    loadList(_studentBaseObj);
+    _loadList(_studentBaseObj);
 }
 
-void AdmissionsOfficeController::aStudentSelected(long ID)
+void AdmissionsOfficeController::aStudentSelected(long ID) const
 {
-    loadBaseInformation(_studentBaseObj, ID);
+    _loadBaseInformation(_studentBaseObj, ID);
 }
 
-void AdmissionsOfficeController::saveAStudent()
+bool AdmissionsOfficeController::saveAStudent()
 {
+    long id = _ui->IDBox->text().toLong();
+    bool isAdding = _args.contains("adding") && _args["adding"].toInt();
+    bool isExists = _studentBaseObj->checkIDExists(id);
 
+    if(isAdding && isExists)//添加时发现学号已存在
+        return false;
+
+    Student newStudentObj(
+                _ui->NameBox->text(),
+                id,
+                _ui->FemaleRadio->isCheckable(),
+                _ui->AgeBox->value(),
+                _ui->AddressBox->text());
+
+    if(!isAdding)//修改现有
+    {
+        _studentBaseObj->saveAStudentDetails(newStudentObj);
+        _ui->StudentList->item(_ui->StudentList->currentRow(), 1)
+                ->setText(_ui->NameBox->text());//更新列表中的姓名
+    }
+    else//添加新学生
+    {
+        _studentBaseObj->addAStudent(
+                    newStudentObj, _stringToFacultyName(_args["major"]), _stringToFacultyName(_args["minor"]));
+        loadStudentList();//重新加载列表
+    }
+    return true;
 }
 
 
@@ -57,14 +84,14 @@ FacultyController::FacultyController(Ui::StudentMain *ui, FacultyName facultyNam
     _WIG_DIS(_ui->DeleteStudent);
 }
 
-void FacultyController::loadStudentList()
+void FacultyController::loadStudentList() const
 {
-    loadList(_facultyObj);
+    _loadList(_facultyObj);
 }
 
-void FacultyController::aStudentSelected(long ID)
+void FacultyController::aStudentSelected(long ID) const
 {
-    loadBaseInformation(_facultyObj, ID);
+    _loadBaseInformation(_facultyObj, ID);
 
     bool isMajor = _facultyObj->isMajor(ID);
     if(isMajor)
@@ -85,10 +112,10 @@ void FacultyController::aStudentSelected(long ID)
         _ui->MinorScoreList->clearContents();
     }
     else
-        loadScores(_facultyObj, ID, isMajor);
+        _loadScores(_facultyObj, ID, isMajor);
 }
 
-void FacultyController::saveAStudent()
+bool FacultyController::saveAStudent()
 {
 
 }
@@ -114,20 +141,22 @@ DegreesOfficeController::DegreesOfficeController(Ui::StudentMain *ui)
     _WIG_DIS(_ui->DeleteMinorScore);
 }
 
-void DegreesOfficeController::loadStudentList()
+void DegreesOfficeController::loadStudentList() const
 {
-    loadList(_misObj);
+    _loadList(_misObj);
 }
 
-void DegreesOfficeController::aStudentSelected(long ID)
+void DegreesOfficeController::aStudentSelected(long ID) const
 {
-    loadBaseInformation(_misObj, ID);
-    loadScores(_misObj, ID, true);
-    loadScores(_misObj, ID, false);
+    _loadBaseInformation(_misObj, ID);
+    _loadScores(_misObj, ID, true);
+    _loadScores(_misObj, ID, false);
 }
 
-void DegreesOfficeController::saveAStudent()
+bool DegreesOfficeController::saveAStudent()
 {
 
 }
+
+
 }

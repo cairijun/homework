@@ -31,12 +31,24 @@ bool StudentBase::_saveDataToFile()
 
 /**
  * @brief saveAStudentDetails 保存一个学生的详细信息
- * @param s @class Student "Student.h" 对象，待保存的学生信息。若该
- *学号在学生列表中不存在，则添加到学生列表中。
+ * @param s @class Student "Student.h" 对象，待保存的学生信息。
  */
 void StudentBase::saveAStudentDetails(Student &s)
 {
+    auto i = _studentList.find(s.getID());
+    if(i != _studentList.end())
+        *i = s;
+}
 
+void StudentBase::addAStudent(Student &s, FacultyName majorFaculty, FacultyName minorFaculty)
+{
+    _studentList[s.getID()] = s;
+    //To-do: 写入专业信息
+}
+
+void StudentBase::deleteAStudent(long ID)
+{
+    _studentList.remove(ID);
 }
 
 /**
@@ -44,9 +56,9 @@ void StudentBase::saveAStudentDetails(Student &s)
  * @param ID 指定的学号
  * @return 存在返回true，不存在返回false
  */
-bool StudentBase::testStudentID(long ID)
+bool StudentBase::checkIDExists(long ID) const
 {
-
+    return _studentList.find(ID) != _studentList.end();
 }
 
 

@@ -8,6 +8,7 @@
 
 #include "Student.h"
 #include "ui_StudentMain.h"
+#include<QMap>
 
 
 namespace Student
@@ -18,8 +19,16 @@ class IController
 protected:
     Ui::StudentMain *_ui = 0;
 
+    /**
+     * @brief _args 用于保存额外的参数
+     *
+     *为了保持接口一致，视图层与控制器层交互时，如果有某些独立于兄弟类型的
+     *特殊参数需要传递，应通过重载的[]运算符使用这一保护成员进行传递。
+     */
+    QMap<QString, QString> _args;
+
     template<typename T>
-    void loadList(T *modelObj)
+    void _loadList(T *modelObj) const
     {
         _ui->StudentList->setSortingEnabled(false);
         int rowNo = 0;
@@ -32,7 +41,7 @@ protected:
     }
 
     template<typename T>
-    void loadBaseInformation(T *modelObj, long ID)
+    void _loadBaseInformation(T *modelObj, long ID) const
     {
         modelObj->loadAStudentDetails(ID, [this](const Student &studentObj){
             _ui->NameBox->setText(studentObj.getName());
@@ -47,7 +56,7 @@ protected:
     }
 
     template<typename T>
-    void loadScores(T *modelObj, long ID, bool isMajor)
+    void _loadScores(T *modelObj, long ID, bool isMajor) const
     {
         if(isMajor)
             _ui->MajorScoreList->clearContents();
@@ -65,7 +74,7 @@ protected:
                     [pTableObj, &rowNo](const QString &courseName, int score){
             pTableObj->setItem(rowNo, 0, new QTableWidgetItem(courseName));
             pTableObj->setItem(rowNo, 1, new QTableWidgetItem(QString::number(score)));
-            pTableObj->setItem(rowNo, 2, new QTableWidgetItem(score >= 60 ? "PASS" : "FAIL"));
+            pTableObj->setItem(rowNo, 2, new QTableWidgetItem(score >= 60 ? "过" : "挂"));
             ++rowNo;
         });
         pTableObj->setSortingEnabled(true);
@@ -81,9 +90,21 @@ public:
     IController(const IController &) = delete;
     virtual ~IController() {}
 
-    virtual void loadStudentList() = 0;
-    virtual void aStudentSelected(long ID) = 0;
-    virtual void saveAStudent() = 0;
+    virtual void loadStudentList() const = 0;
+    virtual void aStudentSelected(long ID) const = 0;
+    virtual bool saveAStudent() = 0;
+
+    /**
+     * @brief operator [] 重载的[]运算符，用于访问额外参数
+     * @param argKey 参数的键
+     * @return 对参数值的引用
+     */
+    QString & operator[](const QString &argKey)
+    {
+        return _args[argKey];
+    }
+
+    virtual bool checkIDExists(long ID) = 0;
 };
 
 class AdmissionsOfficeController: public IController
@@ -99,9 +120,13 @@ public:
         _CHK_DEL(_studentBaseObj);
     }
 
-    void loadStudentList();
-    void aStudentSelected(long ID);
-    void saveAStudent();
+    void loadStudentList() const;
+    void aStudentSelected(long ID) const;
+    bool saveAStudent();
+    bool checkIDExists(long ID)
+    {
+        return _studentBaseObj->checkIDExists(ID);
+    }
 };
 
 class FacultyController: public IController
@@ -110,7 +135,6 @@ private:
     IFaculty *_facultyObj = 0;
 
 public:
-    enum FacultyName{FACULTY_NAME_A, FACULTY_NAME_B, FACULTY_NAME_C};
 
     FacultyController(Ui::StudentMain *ui, FacultyName facultyName);
 
@@ -119,9 +143,13 @@ public:
         _CHK_DEL(_facultyObj);
     }
 
-    void loadStudentList();
-    void aStudentSelected(long ID);
-    void saveAStudent();
+    void loadStudentList() const;
+    void aStudentSelected(long ID) const;
+    bool saveAStudent();
+    bool checkIDExists(long ID)
+    {
+        return _facultyObj->checkIDExists(ID);
+    }
 };
 
 class DegreesOfficeController: public IController
@@ -137,9 +165,13 @@ public:
         _CHK_DEL(_misObj);
     }
 
-    void loadStudentList();
-    void aStudentSelected(long ID);
-    void saveAStudent();
+    void loadStudentList() const;
+    void aStudentSelected(long ID) const;
+    bool saveAStudent();
+    bool checkIDExists(long ID)
+    {
+        return _misObj->checkIDExists(ID);
+    }
 };
 }
 

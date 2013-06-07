@@ -22,6 +22,37 @@ namespace Student
  *标识不同登录身份的枚举类型。
  */
 enum Role{ADMISSIONS_OFFICE, DEGREES_OFFICE, FACULTY_A, FACULTY_B, FACULTY_C};
+enum FacultyName{FACULTY_NAME_A, FACULTY_NAME_B, FACULTY_NAME_C, FACULTY_NAME_NONE};
+
+class Student;
+class StudentBase;
+class IFaculty;
+class FacultyA;
+class FacultyB;
+class FacultyC;
+class StudentMIS;
+
+/**
+ * @brief _stringToFacultyName 把字符串表示的专业名称转换成@enum FacultyName "Student.h" 类型
+ * @param strName 字符串表示的专业名称，接受Faculty X、Faculty_X、Faculty_name_X的形式，不分大小写
+ * @return strName表示的专业类型。
+ */
+inline FacultyName _stringToFacultyName(const QString &strName)
+{
+#define _CHK_FAC_NAM(x) \
+if(strNameUpper == "FACULTY " #x\
+|| strNameUpper == "FACULTY_" #x\
+|| strNameUpper == "FACULTY_NAME_" #x)\
+return FACULTY_NAME_##x
+
+    QString strNameUpper = strName.toUpper();
+    _CHK_FAC_NAM(A);
+    _CHK_FAC_NAM(B);
+    _CHK_FAC_NAM(C);
+    _CHK_FAC_NAM(NONE);
+
+#undef _CHK_FAC_NAM
+}
 
 /**
  * @brief _const 返回一个变量的常量引用，协助进行自动类型推断。
@@ -166,17 +197,20 @@ public:
 
     /**
      * @brief saveAStudentDetails 保存一个学生的详细信息
-     * @param s @class Student "Student.h" 对象，待保存的学生信息。若该
-     *学号在学生列表中不存在，则添加到学生列表中。
+     * @param s @class Student "Student.h" 对象，待保存的学生信息。
      */
     void saveAStudentDetails(Student &s);
+
+    void addAStudent(Student &s, FacultyName majorFaculty, FacultyName minorFaculty);
+
+    void deleteAStudent(long ID);
 
     /**
      * @brief testStudentID 检查指定的学号是否存在当前的学生列表中
      * @param ID 指定的学号
      * @return 存在返回true，不存在返回false
      */
-    bool testStudentID(long ID);
+    bool checkIDExists(long ID) const;
 };
 
 
@@ -204,7 +238,7 @@ public:
     IFaculty(int s, int k, const QString &facultyName): _s(s), _k(k), _facultyName(facultyName) {}
     virtual ~IFaculty() {}
     virtual void makeReport();
-    virtual void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
+    void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
 
     bool isMajor(long ID) const
     {
@@ -235,7 +269,7 @@ public:
 
     using StudentBase::loadStudentList;
     using StudentBase::loadAStudentDetails;
-    using StudentBase::testStudentID;
+    using StudentBase::checkIDExists;
 };
 
 
@@ -250,7 +284,7 @@ private:
 
 public:
     FacultyA(int s = 6, int k = 5)
-        :IFaculty(s, k, "Faculty A")
+        :IFaculty(s, k, "专业A")
     {
         IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
@@ -271,7 +305,7 @@ private:
 
 public:
     FacultyB(int s = 7, int k = 4)
-        :IFaculty(s, k, "Faculty B")
+        :IFaculty(s, k, "专业B")
     {
         IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
@@ -291,7 +325,7 @@ private:
 
 public:
     FacultyC(int s = 5, int k = 3)
-        :IFaculty(s, k, "Faculty C")
+        :IFaculty(s, k, "专业C")
     {
         IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
     }
@@ -306,10 +340,13 @@ public:
 
 class StudentMIS: public FacultyA, public FacultyB, public FacultyC
 {
+private:
+    void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
+
 public:
     using StudentBase::loadStudentList;
     using StudentBase::loadAStudentDetails;
-    using StudentBase::testStudentID;
+    using StudentBase::checkIDExists;
 
     template<typename FunType>
     QString loadAStudentScores(long ID, bool isMajor, FunType f) const
