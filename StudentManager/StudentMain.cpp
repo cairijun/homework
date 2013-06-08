@@ -81,7 +81,8 @@ void StudentMain::on_SaveData_clicked()
 void StudentMain::on_ResetData_clicked()
 {
     QTableWidgetItem *item = ui->StudentList->item(ui->StudentList->currentRow(), 0);
-    _controller->aStudentSelected(item->text().toLong());
+    if(item)//只有在选择了已存在的学生才重置
+        _controller->aStudentSelected(item->text().toLong());
 }
 
 void StudentMain::on_AddStudent_clicked()
