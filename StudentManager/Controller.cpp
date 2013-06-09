@@ -12,6 +12,7 @@ AdmissionsOfficeController::AdmissionsOfficeController(Ui::StudentMain *ui)
     :IController(ui), _studentBaseObj(new StudentBase)
 {
     _WIG_DIS(_ui->ScoresGroupBox);
+    _WIG_DIS(_ui->DegreeStat);
 }
 
 void AdmissionsOfficeController::loadStudentList() const
@@ -78,8 +79,8 @@ FacultyController::FacultyController(Ui::StudentMain *ui, FacultyName facultyNam
 
     _WIG_DIS(_ui->MaleRadio);
     _WIG_DIS(_ui->FemaleRadio);
-    _WIG_DIS(_ui->SaveData);
-    _WIG_DIS(_ui->ResetData);
+    //_WIG_DIS(_ui->SaveData);
+    //_WIG_DIS(_ui->ResetData);
     _WIG_DIS(_ui->AddStudent);
     _WIG_DIS(_ui->DeleteStudent);
 }
@@ -117,7 +118,30 @@ void FacultyController::aStudentSelected(long ID) const
 
 bool FacultyController::saveAStudent()
 {
-
+    long ID = _ui->IDBox->text().toLong();
+    QMap<QString, int> temp;
+    if(_facultyObj->isMajor(ID))
+    {
+        for(int i = 0; i < _ui->MajorScoreList->rowCount(); ++i)
+        {
+            auto item = _ui->MajorScoreList->item(i, 0);
+            if(item)
+                temp[item->text()] = _ui->MajorScoreList->item(i, 1)->text().toInt();
+        }
+        _facultyObj->saveAStudentScores(ID, true, temp);
+    }
+    else if(_facultyObj->isMinor(ID))
+    {
+        temp.clear();
+        for(int i = 0; i < _ui->MinorScoreList->rowCount(); ++i)
+        {
+            auto item = _ui->MinorScoreList->item(i, 0);
+            if(item)
+                temp[item->text()] = _ui->MinorScoreList->item(i, 1)->text().toInt();
+        }
+        _facultyObj->saveAStudentScores(ID, false, temp);
+    }
+    return true;
 }
 
 DegreesOfficeController::DegreesOfficeController(Ui::StudentMain *ui)

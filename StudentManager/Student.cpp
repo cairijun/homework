@@ -112,7 +112,11 @@ void IFaculty::makeReport()
 
 void IFaculty::saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores)
 {
-
+    if(scores.size())
+    {
+        auto pScoreList = isMajor ? &_majorStudentScores : &_minorStudentScores;
+        pScoreList->insert(ID, scores);
+    }
 }
 
 const char * StudentBase::_FILENAME = "BaseFile.dat";

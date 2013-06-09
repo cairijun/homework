@@ -172,12 +172,15 @@ public:
      * @param f 一个类型为void (*)(long, QString)的函数指针或有兼容原型
      *的函数、函数对象、lambda表达式。loadStudentList函数会对每个学生
      *调用f，并传入学号和学生姓名。
+     * @param count size_t类型的指针，返回学生总数。
      */
     template<typename FunType>
-    void loadStudentList(FunType f) const
+    void loadStudentList(FunType f, size_t *count = 0) const
     {
         for(auto i : _const(_studentList))
             f(i.getID(), i.getName());
+        if(count)
+            *count = _studentList.size();
     }
 
     /**
@@ -211,6 +214,11 @@ public:
      * @return 存在返回true，不存在返回false
      */
     bool checkIDExists(long ID) const;
+
+    size_t getStudentCount() const
+    {
+        return _studentList.size();
+    }
 };
 
 
@@ -250,7 +258,7 @@ public:
     }
 
     template<typename FunType>
-    QString loadAStudentScores(long ID, bool isMajor, FunType f) const
+    QString loadAStudentScores(long ID, bool isMajor, FunType f, size_t *count = 0) const
     {
         auto pStudentScores = isMajor ? &_majorStudentScores : &_minorStudentScores;
         if(pStudentScores->contains(ID))
@@ -258,6 +266,9 @@ public:
             for(auto i = pStudentScores->value(ID).constBegin();
                 i != pStudentScores->value(ID).constEnd(); ++i)
                 f(i.key(), i.value());
+
+            if(count)
+                *count = pStudentScores->value(ID).size();
 
             return _facultyName;
         }
@@ -267,9 +278,19 @@ public:
         }
     }
 
+    size_t getScoreListCount(long ID, bool isMajor) const
+    {
+        auto p = isMajor ? &_majorStudentScores : &_minorStudentScores;
+        if(p->contains(ID))
+            return (*p)[ID].size();
+        else
+            return 0;
+    }
+
     using StudentBase::loadStudentList;
     using StudentBase::loadAStudentDetails;
     using StudentBase::checkIDExists;
+    using StudentBase::getStudentCount;
 };
 
 
@@ -338,7 +359,7 @@ public:
 };
 
 
-class StudentMIS: public FacultyA, public FacultyB, public FacultyC
+class StudentMIS: protected FacultyA, protected FacultyB, protected FacultyC
 {
 private:
     void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
@@ -347,15 +368,16 @@ public:
     using StudentBase::loadStudentList;
     using StudentBase::loadAStudentDetails;
     using StudentBase::checkIDExists;
+    using StudentBase::getStudentCount;
 
     template<typename FunType>
-    QString loadAStudentScores(long ID, bool isMajor, FunType f) const
+    QString loadAStudentScores(long ID, bool isMajor, FunType f, size_t *count = 0) const
     {
-        QString facultyName = FacultyA::loadAStudentScores(ID, isMajor, f);
+        QString facultyName = FacultyA::loadAStudentScores(ID, isMajor, f, count);
         if(!facultyName.size())
-            facultyName = FacultyB::loadAStudentScores(ID, isMajor, f);
+            facultyName = FacultyB::loadAStudentScores(ID, isMajor, f, count);
         if(!facultyName.size())
-            facultyName = FacultyC::loadAStudentScores(ID, isMajor, f);
+            facultyName = FacultyC::loadAStudentScores(ID, isMajor, f, count);
         return facultyName;
     }
 };

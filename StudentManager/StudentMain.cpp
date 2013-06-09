@@ -3,6 +3,7 @@
 
 #include<cassert>
 #include<QStringList>
+#include<QStringBuilder>
 #include<QMessageBox>
 #include<QInputDialog>
 #include<map>
@@ -130,4 +131,64 @@ void StudentMain::on_AddStudent_clicked()
     (*_controller)["adding"] = "1";
     (*_controller)["major"] = facultyNameDict[major];
     (*_controller)["minor"] = facultyNameDict[minor];
+}
+
+void StudentMain::on_AddMajorScore_clicked()
+{
+    bool isOk = false;
+    QString name = QInputDialog::getText(this, "添加科目成绩", "请输入（主修）科目名称：", QLineEdit::Normal, "", &isOk);
+    if(!isOk || !name.size())
+        return;
+
+    QStringList buf;
+    buf << "请输入学生 " << ui->NameBox->text() << " （学号" << ui->IDBox->text() << "）的 " << name << " （主修）成绩：";
+    int score = QInputDialog::getInt(this, "添加科目成绩", buf.join(""), 80, 0, 100, 1, &isOk);
+    if(!isOk)
+        return;
+
+    int rowCount = ui->MajorScoreList->rowCount();
+    ui->MajorScoreList->setRowCount(rowCount + 1);
+    ui->MajorScoreList->setItem(rowCount, 0, new QTableWidgetItem(name));
+    ui->MajorScoreList->setItem(rowCount, 1, new QTableWidgetItem(QString::number(score)));
+    ui->MajorScoreList->setItem(rowCount, 2, new QTableWidgetItem(score >= 60 ? "过" : "挂"));
+}
+
+void StudentMain::on_DeleteMajorScore_clicked()
+{
+    int row = ui->MajorScoreList->currentRow();
+    auto item = ui->MajorScoreList->item(row, 0);
+    auto button = QMessageBox::warning(this, "删除成绩", "确定要删除" + item->text() + "的成绩吗？",
+                                       QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    if(button == QMessageBox::Yes)
+        ui->MajorScoreList->removeRow(row);
+}
+
+void StudentMain::on_AddMinorScore_clicked()
+{
+    bool isOk = false;
+    QString name = QInputDialog::getText(this, "添加科目成绩", "请输入（辅修）科目名称：", QLineEdit::Normal, "", &isOk);
+    if(!isOk || !name.size())
+        return;
+
+    QStringList buf;
+    buf << "请输入学生 " << ui->NameBox->text() << " （学号" << ui->IDBox->text() << "）的 " << name << " （辅修）成绩：";
+    int score = QInputDialog::getInt(this, "添加科目成绩", buf.join(""), 80, 0, 100, 1, &isOk);
+    if(!isOk)
+        return;
+
+    int rowCount = ui->MinorScoreList->rowCount();
+    ui->MinorScoreList->setRowCount(rowCount + 1);
+    ui->MinorScoreList->setItem(rowCount, 0, new QTableWidgetItem(name));
+    ui->MinorScoreList->setItem(rowCount, 1, new QTableWidgetItem(QString::number(score)));
+    ui->MinorScoreList->setItem(rowCount, 2, new QTableWidgetItem(score >= 60 ? "过" : "挂"));
+}
+
+void StudentMain::on_DeleteMinorScore_clicked()
+{
+    int row = ui->MinorScoreList->currentRow();
+    auto item = ui->MinorScoreList->item(row, 0);
+    auto button = QMessageBox::warning(this, "删除成绩", "确定要删除" + item->text() + "的成绩吗？",
+                                       QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    if(button == QMessageBox::Yes)
+        ui->MinorScoreList->removeRow(row);
 }

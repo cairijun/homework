@@ -31,6 +31,7 @@ protected:
     void _loadList(T *modelObj) const
     {
         _ui->StudentList->setSortingEnabled(false);
+        _ui->StudentList->setRowCount(modelObj->getStudentCount());
         int rowNo = 0;
         modelObj->loadStudentList([&rowNo, this](long ID, const QString &name){
             _ui->StudentList->setItem(rowNo, 0, new QTableWidgetItem(QString::number(ID)));
@@ -38,6 +39,7 @@ protected:
             ++rowNo;
         });
         _ui->StudentList->setSortingEnabled(true);
+        _ui->StudentList->sortItems(0);
     }
 
     template<typename T>
@@ -68,7 +70,10 @@ protected:
                     _ui->MajorScoreList :
                     _ui->MinorScoreList;
 
+        //pTableObj->setRowCount(modelObj->getScoreListCount(ID, isMajor));
+
         pTableObj->setSortingEnabled(false);
+        pTableObj->setRowCount(20);
         QString facultyName = modelObj->loadAStudentScores(
                     ID, isMajor,
                     [pTableObj, &rowNo](const QString &courseName, int score){
@@ -78,6 +83,7 @@ protected:
             ++rowNo;
         });
         pTableObj->setSortingEnabled(true);
+        pTableObj->setRowCount(rowNo);
 
         if(isMajor)
             _ui->MajorLabel->setText(facultyName);

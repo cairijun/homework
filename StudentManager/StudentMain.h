@@ -30,6 +30,14 @@ private slots:
 
     void on_AddStudent_clicked();
 
+    void on_AddMajorScore_clicked();
+
+    void on_DeleteMajorScore_clicked();
+
+    void on_AddMinorScore_clicked();
+
+    void on_DeleteMinorScore_clicked();
+
 private:
     Ui::StudentMain *ui;
     StatisticsDialog *statDialog = 0;
