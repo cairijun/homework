@@ -73,7 +73,7 @@ protected:
         //pTableObj->setRowCount(modelObj->getScoreListCount(ID, isMajor));
 
         pTableObj->setSortingEnabled(false);
-        pTableObj->setRowCount(20);
+        pTableObj->setRowCount(20);//预先设置足够的行，防止无法写入
         QString facultyName = modelObj->loadAStudentScores(
                     ID, isMajor,
                     [pTableObj, &rowNo](const QString &courseName, int score){
@@ -99,6 +99,8 @@ public:
     virtual void loadStudentList() const = 0;
     virtual void aStudentSelected(long ID) const = 0;
     virtual bool saveAStudent() = 0;
+    virtual void displayReport() const = 0;
+    virtual void saveReport() const = 0;
 
     /**
      * @brief operator [] 重载的[]运算符，用于访问额外参数
@@ -117,6 +119,8 @@ class AdmissionsOfficeController: public IController
 {
 private:
     StudentBase *_studentBaseObj = 0;
+    void displayReport() const;
+    void saveReport() const;
 
 public:
     AdmissionsOfficeController(Ui::StudentMain *ui);
@@ -152,6 +156,8 @@ public:
     void loadStudentList() const;
     void aStudentSelected(long ID) const;
     bool saveAStudent();
+    void displayReport() const;
+    void saveReport() const;
     bool checkIDExists(long ID)
     {
         return _facultyObj->checkIDExists(ID);
@@ -162,6 +168,7 @@ class DegreesOfficeController: public IController
 {
 private:
     StudentMIS *_misObj = 0;
+    bool saveAStudent();
 
 public:
     DegreesOfficeController(Ui::StudentMain *ui);
@@ -173,7 +180,8 @@ public:
 
     void loadStudentList() const;
     void aStudentSelected(long ID) const;
-    bool saveAStudent();
+    void displayReport() const;
+    void saveReport() const;
     bool checkIDExists(long ID)
     {
         return _misObj->checkIDExists(ID);

@@ -105,7 +105,7 @@ bool IFaculty::_saveDataToFile(const char *majorFileName, const char *minorFileN
 
 }
 
-void IFaculty::makeReport()
+QString IFaculty::makeReport(bool isHTML) const
 {
 
 }

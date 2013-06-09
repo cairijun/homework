@@ -49,7 +49,9 @@ return FACULTY_NAME_##x
     _CHK_FAC_NAM(A);
     _CHK_FAC_NAM(B);
     _CHK_FAC_NAM(C);
-    _CHK_FAC_NAM(NONE);
+    //_CHK_FAC_NAM(NONE);
+
+    return FACULTY_NAME_NONE;
 
 #undef _CHK_FAC_NAM
 }
@@ -245,7 +247,8 @@ public:
      */
     IFaculty(int s, int k, const QString &facultyName): _s(s), _k(k), _facultyName(facultyName) {}
     virtual ~IFaculty() {}
-    virtual void makeReport();
+
+    virtual QString makeReport(bool isHTML = true) const;
     void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
 
     bool isMajor(long ID) const

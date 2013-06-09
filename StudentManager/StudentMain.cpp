@@ -75,7 +75,8 @@ void StudentMain::on_StudentList_currentCellChanged(int currentRow, int currentC
 
 void StudentMain::on_SaveData_clicked()
 {
-    _controller->saveAStudent();
+    if(_controller->saveAStudent())
+        QMessageBox::information(this, "保存信息", "保存成功！");
     (*_controller)["adding"] = "0";//取消控制器的添加状态，防止控制器把保存当成添加
 }
 
@@ -141,7 +142,7 @@ void StudentMain::on_AddMajorScore_clicked()
         return;
 
     QStringList buf;
-    buf << "请输入学生 " << ui->NameBox->text() << " （学号" << ui->IDBox->text() << "）的 " << name << " （主修）成绩：";
+    buf << "请输入学生 " << ui->NameBox->text() << " （学号" << ui->IDBox->text() << "）的\n" << name << " （主修）成绩：";
     int score = QInputDialog::getInt(this, "添加科目成绩", buf.join(""), 80, 0, 100, 1, &isOk);
     if(!isOk)
         return;
@@ -171,7 +172,7 @@ void StudentMain::on_AddMinorScore_clicked()
         return;
 
     QStringList buf;
-    buf << "请输入学生 " << ui->NameBox->text() << " （学号" << ui->IDBox->text() << "）的 " << name << " （辅修）成绩：";
+    buf << "请输入学生 " << ui->NameBox->text() << " （学号" << ui->IDBox->text() << "）的\n" << name << " （辅修）成绩：";
     int score = QInputDialog::getInt(this, "添加科目成绩", buf.join(""), 80, 0, 100, 1, &isOk);
     if(!isOk)
         return;

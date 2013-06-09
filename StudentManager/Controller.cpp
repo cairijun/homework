@@ -144,6 +144,14 @@ bool FacultyController::saveAStudent()
     return true;
 }
 
+void FacultyController::displayReport() const
+{
+}
+
+void FacultyController::saveReport() const
+{
+}
+
 DegreesOfficeController::DegreesOfficeController(Ui::StudentMain *ui)
     :IController(ui), _misObj(new StudentMIS)
 {
@@ -177,9 +185,25 @@ void DegreesOfficeController::aStudentSelected(long ID) const
     _loadScores(_misObj, ID, false);
 }
 
+void DegreesOfficeController::displayReport() const
+{
+}
+
+void DegreesOfficeController::saveReport() const
+{
+}
+
 bool DegreesOfficeController::saveAStudent()
 {
+    return false;//这个方法不应该有任何实际的实现
+}
 
+void AdmissionsOfficeController::displayReport() const
+{
+}
+
+void AdmissionsOfficeController::saveReport() const
+{
 }
 
 
