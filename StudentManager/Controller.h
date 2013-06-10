@@ -99,7 +99,7 @@ public:
     virtual void loadStudentList() const = 0;
     virtual void aStudentSelected(long ID) const = 0;
     virtual bool saveAStudent() = 0;
-    virtual void displayReport() const = 0;
+    virtual QString displayReport() const = 0;
     virtual void saveReport() const = 0;
 
     /**
@@ -119,7 +119,7 @@ class AdmissionsOfficeController: public IController
 {
 private:
     StudentBase *_studentBaseObj = 0;
-    void displayReport() const;
+    QString displayReport() const;
     void saveReport() const;
 
 public:
@@ -136,6 +136,11 @@ public:
     bool checkIDExists(long ID)
     {
         return _studentBaseObj->checkIDExists(ID);
+    }
+
+    void deleteStudent(long ID)
+    {
+        _studentBaseObj->deleteAStudent(ID);
     }
 };
 
@@ -156,7 +161,7 @@ public:
     void loadStudentList() const;
     void aStudentSelected(long ID) const;
     bool saveAStudent();
-    void displayReport() const;
+    QString displayReport() const;
     void saveReport() const;
     bool checkIDExists(long ID)
     {
@@ -180,7 +185,7 @@ public:
 
     void loadStudentList() const;
     void aStudentSelected(long ID) const;
-    void displayReport() const;
+    QString displayReport() const;
     void saveReport() const;
     bool checkIDExists(long ID)
     {

@@ -1,5 +1,8 @@
 #include "Student.h"
 #include<QString>
+#include<QStringList>
+#include<algorithm>
+#include<iterator>
 /**
  * @file 提供数据模型层的类定义
  * @author Richard Tsai
@@ -105,9 +108,27 @@ bool IFaculty::_saveDataToFile(const char *majorFileName, const char *minorFileN
 
 }
 
-QString IFaculty::makeReport(bool isHTML) const
+QString IFaculty::makeReport(
+        bool isHTML,
+        QString *pGood, QString *pMajorFailed, QString *pMinorFailed) const
 {
-
+    QString goodStudentStr = _findGoodStudents(isHTML).join("\n");
+    QString majorFailed = _findFailedStudents(isHTML, _majorStudentScores, true).join("");
+    QString minorFailed = _findFailedStudents(isHTML, _minorStudentScores, false).join("");
+    if(pGood)
+        *pGood = goodStudentStr;
+    if(pMajorFailed)
+        *pMajorFailed = majorFailed;
+    if(pMinorFailed)
+        *pMinorFailed = minorFailed;
+    if(isHTML)
+        return QString("<h1 align=\"center\">%1成绩统计报告</h1>"
+                       "<h2>主修优秀学生</h2><ol>%2</ol>"
+                       "<h2>补考学生（主修）</h2><ol>%3</ol>"
+                       "<h2>补考学生（辅修）</h2><ol>%4</ol>")
+                .arg(_facultyName).arg(goodStudentStr).arg(majorFailed).arg(minorFailed);
+    else
+        return goodStudentStr + majorFailed + minorFailed;
 }
 
 void IFaculty::saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores)
@@ -126,5 +147,79 @@ const char * FacultyB::_FILENAME_MAJOR = "BMajor.dat";
 const char * FacultyB::_FILENAME_MINOR = "BMinor.dat";
 const char * FacultyC::_FILENAME_MAJOR = "CMajor.dat";
 const char * FacultyC::_FILENAME_MINOR = "CMinor.dat";
+
+QString StudentMIS::makeReport(bool isHTML) const
+{
+    if(isHTML)
+    {
+        return QString("<h1 align=\"center\">成绩统计报告</h1>");
+    }
+    else
+    {
+        return "";
+    }
+}
+
+QStringList IFaculty::_findGoodStudents(bool isHTML) const
+{
+    QStringList returnBuf;
+    for(auto i = _majorStudentScores.constBegin(); i != _majorStudentScores.constEnd(); ++i)
+    {
+        size_t countOver85 = 0;
+        bool isOver70 = true;
+        for(auto score: i.value())
+        {
+            if(score >= 85)
+                ++countOver85;
+            if(score < 70)
+            {
+                isOver70 = false;
+                break;
+            }
+        }
+        if(countOver85 >= 3 && isOver70)
+        {
+            auto aStudent = _studentList[i.key()];
+            returnBuf << QString(isHTML ? "<li>%1<br />学号：%2</li>" : "%1 %2")
+                         .arg(aStudent.getName()).arg(aStudent.getID());
+        }
+    }
+    return returnBuf;
+}
+
+QStringList IFaculty::_findFailedStudents(
+        bool isHTML, const QMap<long, QMap<QString, int> > &scoreList, bool isMajor) const
+{
+    QStringList returnBuf;
+    for(auto i = scoreList.constBegin(); i != scoreList.constEnd(); ++i)
+    {
+        bool isFailed = false;
+        QStringList aStudentData;
+        for(auto j = i.value().constBegin(); j != i.value().constEnd(); ++j)
+            if(j.value() < 60)
+            {
+                if(!isFailed)
+                {
+                    isFailed = true;
+                    auto aStudentObj = _studentList[i.key()];
+                    if(isHTML)
+                        aStudentData << "<li>" << aStudentObj.getName()
+                                     << "<br />学号：" << QString::number(aStudentObj.getID())
+                                     << "<br />重修科目：";
+                    else
+                        aStudentData << aStudentObj.getName()
+                                     << QString::number(aStudentObj.getID()) << " ";
+                }
+                aStudentData << j.key() << " ";
+            }
+        if(isFailed)
+        {
+            if(isHTML)
+                aStudentData << "</li>";
+            returnBuf << aStudentData.join("");
+        }
+    }
+    return returnBuf;
+}
 
 }

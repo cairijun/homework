@@ -71,6 +71,8 @@ FacultyController::FacultyController(Ui::StudentMain *ui, FacultyName facultyNam
     case FACULTY_NAME_C:
         _facultyObj = new FacultyC;
         break;
+    case FACULTY_NAME_NONE:
+        break;
     }
 
     _WIG_ROL(_ui->NameBox);
@@ -144,8 +146,9 @@ bool FacultyController::saveAStudent()
     return true;
 }
 
-void FacultyController::displayReport() const
+QString FacultyController::displayReport() const
 {
+    return _facultyObj->makeReport(true);
 }
 
 void FacultyController::saveReport() const
@@ -185,8 +188,9 @@ void DegreesOfficeController::aStudentSelected(long ID) const
     _loadScores(_misObj, ID, false);
 }
 
-void DegreesOfficeController::displayReport() const
+QString DegreesOfficeController::displayReport() const
 {
+    return _misObj->makeReport(true);
 }
 
 void DegreesOfficeController::saveReport() const
@@ -195,15 +199,19 @@ void DegreesOfficeController::saveReport() const
 
 bool DegreesOfficeController::saveAStudent()
 {
+    throw QString("错误地调用了DegreesOfficeController::saveAStudent()方法！");
     return false;//这个方法不应该有任何实际的实现
 }
 
-void AdmissionsOfficeController::displayReport() const
+QString AdmissionsOfficeController::displayReport() const
 {
+    throw QString("错误地调用了AdmissionsOfficeController::displayReport()方法！");
+    return "";
 }
 
 void AdmissionsOfficeController::saveReport() const
 {
+    throw QString("错误地调用了AdmissionsOfficeController::saveReport()方法！");
 }
 
 

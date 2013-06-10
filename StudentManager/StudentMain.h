@@ -3,6 +3,7 @@
 
 #include "Student.h"
 #include "StatisticsDialog.h"
+#include "ui_StatisticsDialog.h"
 #include "Controller.h"
 #include <QWidget>
 
@@ -29,6 +30,8 @@ private slots:
     void on_ResetData_clicked();
 
     void on_AddStudent_clicked();
+
+    void on_DeleteStudent_clicked();
 
     void on_AddMajorScore_clicked();
 

@@ -144,7 +144,6 @@ public:
 class StudentBase
 {
 private:
-    QMap<long, Student> _studentList;
     static const char *_FILENAME;
 
     /**
@@ -158,6 +157,10 @@ private:
      * @return 保存成功返回true，失败返回false
      */
     bool _saveDataToFile();
+
+protected:
+    QMap<long, Student> _studentList;
+
 public:
     StudentBase()
     {
@@ -232,6 +235,11 @@ public:
  */
 class IFaculty: virtual protected StudentBase
 {
+private:
+    QStringList _findGoodStudents(bool isHTML) const;
+    QStringList _findFailedStudents(
+            bool isHTML, const QMap<long, QMap<QString, int> > &scoreList, bool isMajor) const;
+
 protected:
     QMap<long, QMap<QString, int> > _majorStudentScores, _minorStudentScores;
     QString _facultyName;
@@ -248,7 +256,8 @@ public:
     IFaculty(int s, int k, const QString &facultyName): _s(s), _k(k), _facultyName(facultyName) {}
     virtual ~IFaculty() {}
 
-    virtual QString makeReport(bool isHTML = true) const;
+    virtual QString makeReport(bool isHTML = true,
+            QString *pGood = 0, QString *pMajorFailed = 0, QString *pMinorFailed = 0) const;
     void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
 
     bool isMajor(long ID) const
@@ -383,6 +392,8 @@ public:
             facultyName = FacultyC::loadAStudentScores(ID, isMajor, f, count);
         return facultyName;
     }
+
+    QString makeReport(bool isHTML) const;
 };
 
 }

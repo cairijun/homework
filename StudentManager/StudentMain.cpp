@@ -53,8 +53,11 @@ StudentMain::StudentMain(Student::Role role, QWidget *parent)
 void StudentMain::on_DegreeStat_clicked()
 {
     statDialog = new StatisticsDialog;
-    statDialog->show();
-    statDialog->exec();
+    statDialog->setContent(_controller->displayReport());
+    //statDialog->ui->ReportBox->setHtml(_controller->displayReport());
+    //statDialog->show();
+    if(statDialog->exec())
+        _controller->saveReport();
     delete statDialog;
     statDialog = 0;
 }
@@ -132,6 +135,24 @@ void StudentMain::on_AddStudent_clicked()
     (*_controller)["adding"] = "1";
     (*_controller)["major"] = facultyNameDict[major];
     (*_controller)["minor"] = facultyNameDict[minor];
+}
+
+void StudentMain::on_DeleteStudent_clicked()
+{
+    int row = ui->StudentList->currentRow();
+    auto item = ui->StudentList->item(row, 1);
+    if(item)
+    {
+        auto button = QMessageBox::warning(this, "删除学生", "确定要删除学生 " + item->text() + " 吗？",
+                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if(button == QMessageBox::Yes)
+        {
+            long ID = ui->StudentList->item(row, 0)->text().toLong();
+            auto pController = dynamic_cast<Student::AdmissionsOfficeController *>(_controller);
+            pController->deleteStudent(ID);
+            ui->StudentList->removeRow(row);
+        }
+    }
 }
 
 void StudentMain::on_AddMajorScore_clicked()
