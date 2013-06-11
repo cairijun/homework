@@ -8,6 +8,7 @@
 
 #include<QString>
 #include<QMap>
+#include<QSet>
 #include<QPair>
 #include<QVector>
 
@@ -72,12 +73,9 @@ inline const T& _const(const T& o)
  *
  *表示一个学生，保存学生的基本个人信息。
  *仅提供读取接口。
- *友元：@class StudentBase "Student.h"
  */
 class Student
 {
-    friend class StudentBase;
-
 private:
     long _ID;
     QString _name, _address;
@@ -243,9 +241,23 @@ private:
 protected:
     QMap<long, QMap<QString, int> > _majorStudentScores, _minorStudentScores;
     QString _facultyName;
-    virtual bool _loadDataFromFile(const char *majorFileName, const char *minorFileName);
-    virtual bool _saveDataToFile(const char *majorFileName, const char *minorFileName);
+    virtual bool _loadDataFromFile(bool isMajor);
+    virtual bool _saveDataToFile(bool isMajor) const;
+
+    /**
+     * @brief _achieveDegree 获取获得学位的学生集合
+     * @param isMajor 是否主修学生
+     * @return 获得学位的学生的学号集合
+     * @warning 查询辅修学位时，不会排除未获得主修学位的学生，
+     *因此需要计算与所有专业获得主修学位学生集合的交集。
+     */
+    virtual QSet<long> _achieveDegree(bool isMajor) const;
     int _s, _k;
+    const QString _FILENAME_MAJOR;
+    const QString _FILENAME_MINOR;
+    const QString _FILENAME_GOOD;
+    const QString _FILENAME_MAJOR_FAIL;
+    const QString _FILENAME_MINOR_FAIL;
 
 public:
     /**
@@ -253,11 +265,19 @@ public:
      * @param s 主修课程数
      * @param k 辅修课程数
      */
-    IFaculty(int s, int k, const QString &facultyName): _s(s), _k(k), _facultyName(facultyName) {}
+    IFaculty(int s, int k, const QString &facultyName,
+             const QString &fileNameMajor, const QString &fileNameMinor,
+             const QString &fileNameGood,
+             const QString &fileNameMajorFail, const QString &fileNameMinorFail)
+        : _s(s), _k(k), _facultyName(facultyName),
+          _FILENAME_MAJOR(fileNameMajor), _FILENAME_MINOR(fileNameMinor),
+          _FILENAME_GOOD(fileNameGood),
+          _FILENAME_MAJOR_FAIL(fileNameMajorFail), _FILENAME_MINOR_FAIL(fileNameMinorFail) {}
     virtual ~IFaculty() {}
 
     virtual QString makeReport(bool isHTML = true,
             QString *pGood = 0, QString *pMajorFailed = 0, QString *pMinorFailed = 0) const;
+    virtual bool saveReport() const;
     void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
 
     bool isMajor(long ID) const
@@ -299,6 +319,11 @@ public:
             return 0;
     }
 
+    QString getFacultyName() const
+    {
+        return _facultyName;
+    }
+
     using StudentBase::loadStudentList;
     using StudentBase::loadAStudentDetails;
     using StudentBase::checkIDExists;
@@ -311,20 +336,19 @@ public:
  */
 class FacultyA: public IFaculty
 {
-private:
-    static const char *_FILENAME_MAJOR;
-    static const char *_FILENAME_MINOR;
-
 public:
     FacultyA(int s = 6, int k = 5)
-        :IFaculty(s, k, "专业A")
+        :IFaculty(s, k, "专业A",
+                  "AMajor.DAT", "AMinor.DAT", "AGood.DAT", "AMajorFail.DAT", "AMinorFail.DAT")
     {
-        IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
+        IFaculty::_loadDataFromFile(true);
+        IFaculty::_loadDataFromFile(false);
     }
 
     ~FacultyA()
     {
-        IFaculty::_saveDataToFile(_FILENAME_MAJOR, _FILENAME_MINOR);
+        IFaculty::_saveDataToFile(true);
+        IFaculty::_saveDataToFile(false);
     }
 
 };
@@ -332,40 +356,38 @@ public:
 
 class FacultyB: public IFaculty
 {
-private:
-    static const char *_FILENAME_MAJOR;
-    static const char *_FILENAME_MINOR;
-
 public:
     FacultyB(int s = 7, int k = 4)
-        :IFaculty(s, k, "专业B")
+        :IFaculty(s, k, "专业B",
+                  "BMajor.DAT", "BMinor.DAT", "BGood.DAT", "BMajorFail.DAT", "BMinorFail.DAT")
     {
-        IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
+        IFaculty::_loadDataFromFile(true);
+        IFaculty::_loadDataFromFile(false);
     }
 
     ~FacultyB()
     {
-        IFaculty::_saveDataToFile(_FILENAME_MAJOR, _FILENAME_MINOR);
+        IFaculty::_saveDataToFile(true);
+        IFaculty::_saveDataToFile(false);
     }
 
 };
 
 class FacultyC: public IFaculty
 {
-private:
-    static const char *_FILENAME_MAJOR;
-    static const char *_FILENAME_MINOR;
-
 public:
     FacultyC(int s = 5, int k = 3)
-        :IFaculty(s, k, "专业C")
+        :IFaculty(s, k, "专业C",
+                  "CMajor.DAT", "CMinor.DAT", "CGood.DAT", "CMajorFail.DAT", "CMinorFail.DAT")
     {
-        IFaculty::_loadDataFromFile(_FILENAME_MAJOR, _FILENAME_MINOR);
+        IFaculty::_loadDataFromFile(true);
+        IFaculty::_loadDataFromFile(false);
     }
 
     ~FacultyC()
     {
-        IFaculty::_saveDataToFile(_FILENAME_MAJOR, _FILENAME_MINOR);
+        IFaculty::_saveDataToFile(true);
+        IFaculty::_saveDataToFile(false);
     }
 
 };
@@ -375,6 +397,8 @@ class StudentMIS: protected FacultyA, protected FacultyB, protected FacultyC
 {
 private:
     void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
+    QStringList _getReportLine(
+            const QSet<long> &idList, const QString FacultyName, bool isHTML) const;
 
 public:
     using StudentBase::loadStudentList;
@@ -394,6 +418,7 @@ public:
     }
 
     QString makeReport(bool isHTML) const;
+    bool saveReport() const;
 };
 
 }

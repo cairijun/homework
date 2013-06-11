@@ -83,6 +83,7 @@ protected:
             ++rowNo;
         });
         pTableObj->setSortingEnabled(true);
+        pTableObj->sortItems(0);
         pTableObj->setRowCount(rowNo);
 
         if(isMajor)

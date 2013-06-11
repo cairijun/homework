@@ -153,6 +153,7 @@ QString FacultyController::displayReport() const
 
 void FacultyController::saveReport() const
 {
+    _facultyObj->saveReport();
 }
 
 DegreesOfficeController::DegreesOfficeController(Ui::StudentMain *ui)
@@ -195,6 +196,7 @@ QString DegreesOfficeController::displayReport() const
 
 void DegreesOfficeController::saveReport() const
 {
+    _misObj->saveReport();
 }
 
 bool DegreesOfficeController::saveAStudent()

@@ -1,6 +1,8 @@
 #include "Student.h"
 #include<QString>
 #include<QStringList>
+#include<QFile>
+#include<QTextStream>
 #include<algorithm>
 #include<iterator>
 /**
@@ -16,11 +18,23 @@ namespace Student
  */
 bool StudentBase::_loadDataFromFile()
 {
-    //const QString &t = "abc";
-    _studentList[12348003] = Student("Richard Tsai", 12348003, false, 19, "SYSU");
-    _studentList[12348004] = Student("Someone", 12348004, true, 18, "SYSU");
-    _studentList[12348005] = Student("AAA", 12348005, false, 19, "ABC");
-    _studentList[12348006] = Student("XXX", 12348006, false, 20, "frlkajsl");
+    QFile fileObj(_FILENAME);
+    if(!fileObj.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream fStream(&fileObj);
+    while(!fStream.atEnd())
+    {
+        long ID, age;
+        QString name, address;
+        int sex;//QTextStream的流提取运算符不支持bool类型，这里使用int代替
+        QString line = fStream.readLine();
+        QTextStream lineStream(&line);
+        lineStream >> ID >> name >> sex >> age >> address;
+        _studentList[ID] = Student(name, ID, sex, age, address);
+    }
+    fileObj.close();
+    return true;
 }
 
 /**
@@ -65,47 +79,57 @@ bool StudentBase::checkIDExists(long ID) const
 }
 
 
-
-bool IFaculty::_loadDataFromFile(const char *majorFileName, const char *minorFileName)
+bool IFaculty::_loadDataFromFile(bool isMajor)
 {
-    if(majorFileName == QString("AMajor.dat"))
+    QFile fileObj(isMajor ? _FILENAME_MAJOR : _FILENAME_MINOR);
+    auto pScoreList = isMajor ? &_majorStudentScores : &_minorStudentScores;
+
+    if(!fileObj.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream fStream(&fileObj);
+    while(!fStream.atEnd())
     {
-        _majorStudentScores[12348003] = QMap<QString, int>();
-        auto p = &_majorStudentScores[12348003];
-        p->operator []("C1") = 100;
-        p->operator []("C2") = 50;
-        _minorStudentScores[12348004] = QMap<QString, int>();
-        p = &_minorStudentScores[12348004];
-        p->operator []("C1") = 60;
-        p->operator []("C2") = 50;
+        QString line = fStream.readLine();
+        long id, score;
+        QString subjectName;
+        QTextStream lineStream(&line);
+        lineStream >> id;
+        QMap<QString, int> scoresOfAStudent;
+        while(!lineStream.atEnd())
+        {
+            lineStream >> subjectName >> score;
+            scoresOfAStudent[subjectName] = score;
+        }
+        (*pScoreList)[id] = scoresOfAStudent;
     }
-    if(majorFileName == QString("BMajor.dat"))
-    {
-        _majorStudentScores[12348004] = QMap<QString, int>();
-        auto p = &_majorStudentScores[12348004];
-        p->operator []("C1") = 76;
-        p->operator []("C2") = 9;
-        _minorStudentScores[12348005] = QMap<QString, int>();
-        p = &_minorStudentScores[12348005];
-        p->operator []("C1") = 90;
-        p->operator []("C2") = 15;
-    }
-    if(majorFileName == QString("CMajor.dat"))
-    {
-        _majorStudentScores[12348005] = QMap<QString, int>();
-        auto p = &_majorStudentScores[12348005];
-        p->operator []("C1") = 46;
-        p->operator []("C2") = 80;
-        _minorStudentScores[12348003] = QMap<QString, int>();
-        p = &_minorStudentScores[12348003];
-        p->operator []("C1") = 90;
-        p->operator []("C2") = 90;
-    }
+    fileObj.close();
+    return true;
 }
 
-bool IFaculty::_saveDataToFile(const char *majorFileName, const char *minorFileName)
+bool IFaculty::_saveDataToFile(bool isMajor) const
 {
 
+}
+
+QSet<long> IFaculty::_achieveDegree(bool isMajor) const
+{
+    QSet<long> returnIDs;
+    auto scoreList = isMajor ? &_majorStudentScores : &_minorStudentScores;
+    for(auto i = scoreList->constBegin(); i != scoreList->constEnd(); ++i)
+        if(i.value().size() >= (isMajor ? _s : _k))//检查修读课程数
+        {
+            bool isAchieve = true;
+            for(auto aScore: i.value())
+                if(aScore < 60)
+                {
+                    isAchieve = false;
+                    break;
+                }
+            if(isAchieve)
+                returnIDs.insert(i.key());
+        }
+    return returnIDs;
 }
 
 QString IFaculty::makeReport(
@@ -113,8 +137,8 @@ QString IFaculty::makeReport(
         QString *pGood, QString *pMajorFailed, QString *pMinorFailed) const
 {
     QString goodStudentStr = _findGoodStudents(isHTML).join("\n");
-    QString majorFailed = _findFailedStudents(isHTML, _majorStudentScores, true).join("");
-    QString minorFailed = _findFailedStudents(isHTML, _minorStudentScores, false).join("");
+    QString majorFailed = _findFailedStudents(isHTML, _majorStudentScores, true).join("\n");
+    QString minorFailed = _findFailedStudents(isHTML, _minorStudentScores, false).join("\n");
     if(pGood)
         *pGood = goodStudentStr;
     if(pMajorFailed)
@@ -131,33 +155,58 @@ QString IFaculty::makeReport(
         return goodStudentStr + majorFailed + minorFailed;
 }
 
-void IFaculty::saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores)
+bool IFaculty::saveReport() const
 {
-    if(scores.size())
-    {
-        auto pScoreList = isMajor ? &_majorStudentScores : &_minorStudentScores;
-        pScoreList->insert(ID, scores);
-    }
 }
 
-const char * StudentBase::_FILENAME = "BaseFile.dat";
-const char * FacultyA::_FILENAME_MAJOR = "AMajor.dat";
-const char * FacultyA::_FILENAME_MINOR = "AMinor.dat";
-const char * FacultyB::_FILENAME_MAJOR = "BMajor.dat";
-const char * FacultyB::_FILENAME_MINOR = "BMinor.dat";
-const char * FacultyC::_FILENAME_MAJOR = "CMajor.dat";
-const char * FacultyC::_FILENAME_MINOR = "CMinor.dat";
+void IFaculty::saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores)
+{
+    auto pScoreList = isMajor ? &_majorStudentScores : &_minorStudentScores;
+    pScoreList->insert(ID, scores);
+}
+
+const char * StudentBase::_FILENAME = "Basefile.DAT";
 
 QString StudentMIS::makeReport(bool isHTML) const
 {
+    auto majorA = FacultyA::_achieveDegree(true);
+    auto majorB = FacultyB::_achieveDegree(true);
+    auto majorC = FacultyC::_achieveDegree(true);
+
+    //计算所有获得主修学位的学生集合，用于计算获得辅修学位学生的集合
+    auto allMajor = majorA;
+    allMajor.unite(majorB).unite(majorC);
+    auto minorA = FacultyA::_achieveDegree(false).intersect(allMajor);
+    auto minorB = FacultyB::_achieveDegree(false).intersect(allMajor);
+    auto minorC = FacultyC::_achieveDegree(false).intersect(allMajor);
+
+    //计算未获得学位的学生集合。注意只需要减去获得主修学位学生即可，因为辅修学生是主修学生的子集。
+    auto noDegree = _studentList.keys().toSet().subtract(allMajor);
+
+    auto majorDegreeLines = _getReportLine(majorA, FacultyA::getFacultyName(), isHTML);
+    majorDegreeLines.append(_getReportLine(majorB, FacultyB::getFacultyName(), isHTML));
+    majorDegreeLines.append(_getReportLine(majorC, FacultyC::getFacultyName(), isHTML));
+
+    auto minorDegreeLines = _getReportLine(minorA, FacultyA::getFacultyName(), isHTML);
+    minorDegreeLines.append(_getReportLine(minorB, FacultyB::getFacultyName(), isHTML));
+    minorDegreeLines.append(_getReportLine(minorC, FacultyC::getFacultyName(), isHTML));
+
+    auto noDegreeLines = _getReportLine(noDegree, "无", isHTML);
+
     if(isHTML)
-    {
-        return QString("<h1 align=\"center\">成绩统计报告</h1>");
-    }
+        return QString("<h1 align=\"center\">成绩统计报告</h1>"
+                       "<h2>获得主修学位学生</h2><ol>%1</ol>"
+                       "<h2>获得辅修学位学生</h2><ol>%2</ol>"
+                       "<h2>未获得学位学生</h2><ol>%3</ol>")
+                .arg(majorDegreeLines.join("\n"))
+                .arg(minorDegreeLines.join("\n"))
+                .arg(noDegreeLines.join("\n"));
     else
-    {
-        return "";
-    }
+        return (majorDegreeLines + minorDegreeLines + noDegreeLines).join("\n");
+}
+
+bool StudentMIS::saveReport() const
+{
 }
 
 QStringList IFaculty::_findGoodStudents(bool isHTML) const
@@ -180,7 +229,7 @@ QStringList IFaculty::_findGoodStudents(bool isHTML) const
         if(countOver85 >= 3 && isOver70)
         {
             auto aStudent = _studentList[i.key()];
-            returnBuf << QString(isHTML ? "<li>%1<br />学号：%2</li>" : "%1 %2")
+            returnBuf << QString(isHTML ? "<li><b>%1</b><br />学号：%2</li>" : "%1 %2")
                          .arg(aStudent.getName()).arg(aStudent.getID());
         }
     }
@@ -203,9 +252,9 @@ QStringList IFaculty::_findFailedStudents(
                     isFailed = true;
                     auto aStudentObj = _studentList[i.key()];
                     if(isHTML)
-                        aStudentData << "<li>" << aStudentObj.getName()
-                                     << "<br />学号：" << QString::number(aStudentObj.getID())
-                                     << "<br />重修科目：";
+                        aStudentData << "<li><b>" << aStudentObj.getName()
+                                     << "</b><br />学号：" << QString::number(aStudentObj.getID())
+                                     << "<br />补考科目：";
                     else
                         aStudentData << aStudentObj.getName()
                                      << QString::number(aStudentObj.getID()) << " ";
@@ -218,6 +267,20 @@ QStringList IFaculty::_findFailedStudents(
                 aStudentData << "</li>";
             returnBuf << aStudentData.join("");
         }
+    }
+    return returnBuf;
+}
+
+QStringList StudentMIS::_getReportLine(const QSet<long> &idList, const QString FacultyName, bool isHTML) const
+{
+    QStringList returnBuf;
+    for(long id: idList)
+    {
+        auto studentObj = _studentList[id];
+        returnBuf << QString(isHTML ? "<li><b>%1</b><br />学号：%2<br />学位专业：%3</li>" : "%1 %2 %3")
+                         .arg(studentObj.getName())
+                         .arg(QString::number(studentObj.getID()))
+                         .arg(FacultyName);
     }
     return returnBuf;
 }
