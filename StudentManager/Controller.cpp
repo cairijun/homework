@@ -37,7 +37,7 @@ bool AdmissionsOfficeController::saveAStudent()
     Student newStudentObj(
                 _ui->NameBox->text(),
                 id,
-                _ui->FemaleRadio->isCheckable(),
+                _ui->FemaleRadio->isChecked(),
                 _ui->AgeBox->value(),
                 _ui->AddressBox->text());
 
@@ -60,20 +60,7 @@ bool AdmissionsOfficeController::saveAStudent()
 FacultyController::FacultyController(Ui::StudentMain *ui, FacultyName facultyName)
     :IController(ui)
 {
-    switch(facultyName)
-    {
-    case FACULTY_NAME_A:
-        _facultyObj = new FacultyA;
-        break;
-    case FACULTY_NAME_B:
-        _facultyObj = new FacultyB;
-        break;
-    case FACULTY_NAME_C:
-        _facultyObj = new FacultyC;
-        break;
-    case FACULTY_NAME_NONE:
-        break;
-    }
+    _facultyObj = _facultyNameToFacultyObject(facultyName);
 
     _WIG_ROL(_ui->NameBox);
     _WIG_ROL(_ui->AgeBox);
@@ -151,9 +138,9 @@ QString FacultyController::displayReport() const
     return _facultyObj->makeReport(true);
 }
 
-void FacultyController::saveReport() const
+bool FacultyController::saveReport() const
 {
-    _facultyObj->saveReport();
+    return _facultyObj->saveReport();
 }
 
 DegreesOfficeController::DegreesOfficeController(Ui::StudentMain *ui)
@@ -194,9 +181,9 @@ QString DegreesOfficeController::displayReport() const
     return _misObj->makeReport(true);
 }
 
-void DegreesOfficeController::saveReport() const
+bool DegreesOfficeController::saveReport() const
 {
-    _misObj->saveReport();
+    return _misObj->saveReport();
 }
 
 bool DegreesOfficeController::saveAStudent()
@@ -211,7 +198,7 @@ QString AdmissionsOfficeController::displayReport() const
     return "";
 }
 
-void AdmissionsOfficeController::saveReport() const
+bool AdmissionsOfficeController::saveReport() const
 {
     throw QString("错误地调用了AdmissionsOfficeController::saveReport()方法！");
 }

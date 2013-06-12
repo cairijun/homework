@@ -41,9 +41,22 @@ bool StudentBase::_loadDataFromFile()
  * @brief _saveDataToFile 把数据保存到本地文件中
  * @return 保存成功返回true，失败返回false
  */
-bool StudentBase::_saveDataToFile()
+bool StudentBase::_saveDataToFile() const
 {
+    QFile fileObj(_FILENAME);
+    if(!fileObj.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+        return false;
 
+    QTextStream fStream(&fileObj);
+    for(Student aStudent: _studentList)
+        fStream << aStudent.getID() << " "
+                << aStudent.getName() << " "
+                << aStudent.getSex() << " "
+                << aStudent.getAge() << " "
+                << aStudent.getAddress() << "\n";
+
+    fileObj.close();
+    return true;
 }
 
 /**
@@ -60,7 +73,13 @@ void StudentBase::saveAStudentDetails(Student &s)
 void StudentBase::addAStudent(Student &s, FacultyName majorFaculty, FacultyName minorFaculty)
 {
     _studentList[s.getID()] = s;
-    //To-do: 写入专业信息
+    auto pMajorFaculty = _facultyNameToFacultyObject(majorFaculty);
+    auto pMinorFaculty = _facultyNameToFacultyObject(minorFaculty);
+    pMajorFaculty->saveAStudentScores(s.getID(), true, QMap<QString, int>());
+    if(pMinorFaculty != nullptr)
+        pMinorFaculty->saveAStudentScores(s.getID(), false, QMap<QString, int>());
+    delete pMajorFaculty;
+    delete pMinorFaculty;
 }
 
 void StudentBase::deleteAStudent(long ID)
@@ -95,11 +114,14 @@ bool IFaculty::_loadDataFromFile(bool isMajor)
         QString subjectName;
         QTextStream lineStream(&line);
         lineStream >> id;
+        if(!StudentBase::checkIDExists(id))//排除已被删除的学生
+            continue;
         QMap<QString, int> scoresOfAStudent;
         while(!lineStream.atEnd())
         {
             lineStream >> subjectName >> score;
-            scoresOfAStudent[subjectName] = score;
+            if(subjectName.size())//防止行尾空格干扰
+                scoresOfAStudent[subjectName] = score;
         }
         (*pScoreList)[id] = scoresOfAStudent;
     }
@@ -109,7 +131,21 @@ bool IFaculty::_loadDataFromFile(bool isMajor)
 
 bool IFaculty::_saveDataToFile(bool isMajor) const
 {
+    QFile fileObj(isMajor ? _FILENAME_MAJOR : _FILENAME_MINOR);
+    if(!fileObj.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+        return false;
 
+    QTextStream fStream(&fileObj);
+    auto pScoreList = isMajor ? &_majorStudentScores : &_minorStudentScores;
+    for(auto i = pScoreList->constBegin(); i != pScoreList->constEnd(); ++i)
+    {
+        fStream << i.key() << " ";
+        for(auto j = i.value().constBegin(); j != i.value().constEnd(); ++j)
+            fStream << j.key() << " " << j.value() << " ";
+        fStream << "\n";
+    }
+    fileObj.close();
+    return true;
 }
 
 QSet<long> IFaculty::_achieveDegree(bool isMajor) const
@@ -137,8 +173,8 @@ QString IFaculty::makeReport(
         QString *pGood, QString *pMajorFailed, QString *pMinorFailed) const
 {
     QString goodStudentStr = _findGoodStudents(isHTML).join("\n");
-    QString majorFailed = _findFailedStudents(isHTML, _majorStudentScores, true).join("\n");
-    QString minorFailed = _findFailedStudents(isHTML, _minorStudentScores, false).join("\n");
+    QString majorFailed = _findFailedStudents(isHTML, _majorStudentScores).join("\n");
+    QString minorFailed = _findFailedStudents(isHTML, _minorStudentScores).join("\n");
     if(pGood)
         *pGood = goodStudentStr;
     if(pMajorFailed)
@@ -157,6 +193,30 @@ QString IFaculty::makeReport(
 
 bool IFaculty::saveReport() const
 {
+    QString goodStr, majorFailedStr, minorFailedStr;
+    makeReport(false, &goodStr, &majorFailedStr, &minorFailedStr);
+    QFile fObjGood(_FILENAME_GOOD);
+    if(!fObjGood.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+        return false;
+    fObjGood.write(goodStr.toLocal8Bit());
+    fObjGood.write("\n");
+    fObjGood.close();
+
+    QFile fObjMajorFailed(_FILENAME_MAJOR_FAIL);
+    if(!fObjMajorFailed.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+        return false;
+    fObjMajorFailed.write(majorFailedStr.toLocal8Bit());
+    fObjMajorFailed.write("\n");
+    fObjMajorFailed.close();
+
+    QFile fObjMinorFailed(_FILENAME_MINOR_FAIL);
+    if(!fObjMinorFailed.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+        return false;
+    fObjMinorFailed.write(minorFailedStr.toLocal8Bit());
+    fObjMinorFailed.write("\n");
+    fObjMinorFailed.close();
+
+    return true;
 }
 
 void IFaculty::saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores)
@@ -183,15 +243,15 @@ QString StudentMIS::makeReport(bool isHTML) const
     //计算未获得学位的学生集合。注意只需要减去获得主修学位学生即可，因为辅修学生是主修学生的子集。
     auto noDegree = _studentList.keys().toSet().subtract(allMajor);
 
-    auto majorDegreeLines = _getReportLine(majorA, FacultyA::getFacultyName(), isHTML);
-    majorDegreeLines.append(_getReportLine(majorB, FacultyB::getFacultyName(), isHTML));
-    majorDegreeLines.append(_getReportLine(majorC, FacultyC::getFacultyName(), isHTML));
+    auto majorDegreeLines = _getReportLine(majorA, FacultyA::getFacultyName(), isHTML, true);
+    majorDegreeLines.append(_getReportLine(majorB, FacultyB::getFacultyName(), isHTML, true));
+    majorDegreeLines.append(_getReportLine(majorC, FacultyC::getFacultyName(), isHTML, true));
 
-    auto minorDegreeLines = _getReportLine(minorA, FacultyA::getFacultyName(), isHTML);
-    minorDegreeLines.append(_getReportLine(minorB, FacultyB::getFacultyName(), isHTML));
-    minorDegreeLines.append(_getReportLine(minorC, FacultyC::getFacultyName(), isHTML));
+    auto minorDegreeLines = _getReportLine(minorA, FacultyA::getFacultyName(), isHTML, false);
+    minorDegreeLines.append(_getReportLine(minorB, FacultyB::getFacultyName(), isHTML, false));
+    minorDegreeLines.append(_getReportLine(minorC, FacultyC::getFacultyName(), isHTML, false));
 
-    auto noDegreeLines = _getReportLine(noDegree, "无", isHTML);
+    auto noDegreeLines = _getReportLine(noDegree, "无", isHTML, true);
 
     if(isHTML)
         return QString("<h1 align=\"center\">成绩统计报告</h1>"
@@ -207,6 +267,12 @@ QString StudentMIS::makeReport(bool isHTML) const
 
 bool StudentMIS::saveReport() const
 {
+    QFile fObj(_FILENAME_REPORT);
+    if(!fObj.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+        return false;
+    fObj.write(makeReport(false).toLocal8Bit());
+    fObj.write("\n");
+    return true;
 }
 
 QStringList IFaculty::_findGoodStudents(bool isHTML) const
@@ -227,17 +293,18 @@ QStringList IFaculty::_findGoodStudents(bool isHTML) const
             }
         }
         if(countOver85 >= 3 && isOver70)
-        {
-            auto aStudent = _studentList[i.key()];
-            returnBuf << QString(isHTML ? "<li><b>%1</b><br />学号：%2</li>" : "%1 %2")
-                         .arg(aStudent.getName()).arg(aStudent.getID());
-        }
+            if(_studentList.contains(i.key()))
+            {
+                auto aStudent = _studentList[i.key()];
+                returnBuf << QString(isHTML ? "<li><b>%1</b><br />学号：%2</li>" : "%1 %2")
+                             .arg(aStudent.getName()).arg(aStudent.getID());
+            }
     }
     return returnBuf;
 }
 
 QStringList IFaculty::_findFailedStudents(
-        bool isHTML, const QMap<long, QMap<QString, int> > &scoreList, bool isMajor) const
+        bool isHTML, const QMap<long, QMap<QString, int> > &scoreList) const
 {
     QStringList returnBuf;
     for(auto i = scoreList.constBegin(); i != scoreList.constEnd(); ++i)
@@ -250,13 +317,15 @@ QStringList IFaculty::_findFailedStudents(
                 if(!isFailed)
                 {
                     isFailed = true;
+                    if(!_studentList.contains(i.key()))
+                        continue;
                     auto aStudentObj = _studentList[i.key()];
                     if(isHTML)
                         aStudentData << "<li><b>" << aStudentObj.getName()
                                      << "</b><br />学号：" << QString::number(aStudentObj.getID())
                                      << "<br />补考科目：";
                     else
-                        aStudentData << aStudentObj.getName()
+                        aStudentData << aStudentObj.getName() << " "
                                      << QString::number(aStudentObj.getID()) << " ";
                 }
                 aStudentData << j.key() << " ";
@@ -271,13 +340,17 @@ QStringList IFaculty::_findFailedStudents(
     return returnBuf;
 }
 
-QStringList StudentMIS::_getReportLine(const QSet<long> &idList, const QString FacultyName, bool isHTML) const
+QStringList StudentMIS::_getReportLine(
+        const QSet<long> &idList, const QString FacultyName, bool isHTML, bool isMajor) const
 {
     QStringList returnBuf;
     for(long id: idList)
     {
+        if(!_studentList.contains(id))
+            continue;
         auto studentObj = _studentList[id];
-        returnBuf << QString(isHTML ? "<li><b>%1</b><br />学号：%2<br />学位专业：%3</li>" : "%1 %2 %3")
+        returnBuf << QString(isHTML ? "<li><b>%1</b><br />学号：%2<br />学位专业：%3</li>"
+                                    : isMajor ? "%1 %2 %3 Major" : "%1 %2 %3 Minor")
                          .arg(studentObj.getName())
                          .arg(QString::number(studentObj.getID()))
                          .arg(FacultyName);

@@ -9,8 +9,9 @@ int main(int argc, char *argv[])
     //StudentMain w;
     //w.show();
 
+#if QT_VERSION < 0x050000
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-
+#endif
     LoginDialog login;
     login.show();
     

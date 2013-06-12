@@ -154,7 +154,7 @@ private:
      * @brief _saveDataToFile 把数据保存到本地文件中
      * @return 保存成功返回true，失败返回false
      */
-    bool _saveDataToFile();
+    bool _saveDataToFile() const;
 
 protected:
     QMap<long, Student> _studentList;
@@ -164,6 +164,8 @@ public:
     {
         _loadDataFromFile();
     }
+
+    StudentBase(const StudentBase &) = delete;
 
     virtual ~StudentBase()
     {
@@ -236,11 +238,10 @@ class IFaculty: virtual protected StudentBase
 private:
     QStringList _findGoodStudents(bool isHTML) const;
     QStringList _findFailedStudents(
-            bool isHTML, const QMap<long, QMap<QString, int> > &scoreList, bool isMajor) const;
+            bool isHTML, const QMap<long, QMap<QString, int> > &scoreList) const;
 
 protected:
     QMap<long, QMap<QString, int> > _majorStudentScores, _minorStudentScores;
-    QString _facultyName;
     virtual bool _loadDataFromFile(bool isMajor);
     virtual bool _saveDataToFile(bool isMajor) const;
 
@@ -253,6 +254,7 @@ protected:
      */
     virtual QSet<long> _achieveDegree(bool isMajor) const;
     int _s, _k;
+    QString _facultyName;
     const QString _FILENAME_MAJOR;
     const QString _FILENAME_MINOR;
     const QString _FILENAME_GOOD;
@@ -273,12 +275,17 @@ public:
           _FILENAME_MAJOR(fileNameMajor), _FILENAME_MINOR(fileNameMinor),
           _FILENAME_GOOD(fileNameGood),
           _FILENAME_MAJOR_FAIL(fileNameMajorFail), _FILENAME_MINOR_FAIL(fileNameMinorFail) {}
+
     virtual ~IFaculty() {}
 
     virtual QString makeReport(bool isHTML = true,
             QString *pGood = 0, QString *pMajorFailed = 0, QString *pMinorFailed = 0) const;
     virtual bool saveReport() const;
     void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
+    void deleteAStudentScores(long ID, bool isMajor)
+    {
+        (isMajor ? _majorStudentScores : _minorStudentScores).remove(ID);
+    }
 
     bool isMajor(long ID) const
     {
@@ -393,12 +400,30 @@ public:
 };
 
 
+inline IFaculty * _facultyNameToFacultyObject(FacultyName name)
+{
+    switch(name)
+    {
+    case FACULTY_NAME_A:
+        return new FacultyA;
+    case FACULTY_NAME_B:
+        return new FacultyB;
+    case FACULTY_NAME_C:
+        return new FacultyC;
+    case FACULTY_NAME_NONE:
+        return nullptr;
+    }
+    return nullptr;
+}
+
+
 class StudentMIS: protected FacultyA, protected FacultyB, protected FacultyC
 {
 private:
     void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
     QStringList _getReportLine(
-            const QSet<long> &idList, const QString FacultyName, bool isHTML) const;
+            const QSet<long> &idList, const QString FacultyName, bool isHTML, bool isMajor) const;
+    const QString _FILENAME_REPORT = "Degree.dat";
 
 public:
     using StudentBase::loadStudentList;

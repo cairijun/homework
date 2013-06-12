@@ -101,7 +101,7 @@ public:
     virtual void aStudentSelected(long ID) const = 0;
     virtual bool saveAStudent() = 0;
     virtual QString displayReport() const = 0;
-    virtual void saveReport() const = 0;
+    virtual bool saveReport() const = 0;
 
     /**
      * @brief operator [] 重载的[]运算符，用于访问额外参数
@@ -121,7 +121,7 @@ class AdmissionsOfficeController: public IController
 private:
     StudentBase *_studentBaseObj = 0;
     QString displayReport() const;
-    void saveReport() const;
+    bool saveReport() const;
 
 public:
     AdmissionsOfficeController(Ui::StudentMain *ui);
@@ -163,7 +163,7 @@ public:
     void aStudentSelected(long ID) const;
     bool saveAStudent();
     QString displayReport() const;
-    void saveReport() const;
+    bool saveReport() const;
     bool checkIDExists(long ID)
     {
         return _facultyObj->checkIDExists(ID);
@@ -187,7 +187,7 @@ public:
     void loadStudentList() const;
     void aStudentSelected(long ID) const;
     QString displayReport() const;
-    void saveReport() const;
+    bool saveReport() const;
     bool checkIDExists(long ID)
     {
         return _misObj->checkIDExists(ID);

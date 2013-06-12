@@ -57,7 +57,8 @@ void StudentMain::on_DegreeStat_clicked()
     //statDialog->ui->ReportBox->setHtml(_controller->displayReport());
     //statDialog->show();
     if(statDialog->exec())
-        _controller->saveReport();
+        if(_controller->saveReport())
+            QMessageBox::information(this, "保存报告", "保存成功！");
     delete statDialog;
     statDialog = 0;
 }
