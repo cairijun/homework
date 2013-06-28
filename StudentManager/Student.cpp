@@ -12,10 +12,8 @@
 namespace Student
 {
 
-/**
- * @brief _loadDataFromFile 从@var StudentBase::_FILENAME 指定的文件名读取学生基本信息。
- * @return 读取成功返回true，失败返回false。
- */
+const char * StudentBase::_FILENAME = "Basefile.DAT";
+
 bool StudentBase::_loadDataFromFile()
 {
     QFile fileObj(_FILENAME);
@@ -37,10 +35,6 @@ bool StudentBase::_loadDataFromFile()
     return true;
 }
 
-/**
- * @brief _saveDataToFile 把数据保存到本地文件中
- * @return 保存成功返回true，失败返回false
- */
 bool StudentBase::_saveDataToFile() const
 {
     QFile fileObj(_FILENAME);
@@ -59,10 +53,6 @@ bool StudentBase::_saveDataToFile() const
     return true;
 }
 
-/**
- * @brief saveAStudentDetails 保存一个学生的详细信息
- * @param s @class Student "Student.h" 对象，待保存的学生信息。
- */
 void StudentBase::saveAStudentDetails(Student &s)
 {
     auto i = _studentList.find(s.getID());
@@ -87,11 +77,6 @@ void StudentBase::deleteAStudent(long ID)
     _studentList.remove(ID);
 }
 
-/**
- * @brief testStudentID 检查指定的学号是否存在当前的学生列表中
- * @param ID 指定的学号
- * @return 存在返回true，不存在返回false
- */
 bool StudentBase::checkIDExists(long ID) const
 {
     return _studentList.find(ID) != _studentList.end();
@@ -153,7 +138,7 @@ QSet<long> IFaculty::_achieveDegree(bool isMajor) const
     QSet<long> returnIDs;
     auto scoreList = isMajor ? &_majorStudentScores : &_minorStudentScores;
     for(auto i = scoreList->constBegin(); i != scoreList->constEnd(); ++i)
-        if(i.value().size() >= (isMajor ? _s : _k))//检查修读课程数
+        if(i.value().size() >= (isMajor ? _majorRequire : _minorRequire))//检查修读课程数
         {
             bool isAchieve = true;
             for(auto aScore: i.value())
@@ -225,56 +210,6 @@ void IFaculty::saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scor
     pScoreList->insert(ID, scores);
 }
 
-const char * StudentBase::_FILENAME = "Basefile.DAT";
-
-QString StudentMIS::makeReport(bool isHTML) const
-{
-    auto majorA = FacultyA::_achieveDegree(true);
-    auto majorB = FacultyB::_achieveDegree(true);
-    auto majorC = FacultyC::_achieveDegree(true);
-
-    //计算所有获得主修学位的学生集合，用于计算获得辅修学位学生的集合
-    auto allMajor = majorA;
-    allMajor.unite(majorB).unite(majorC);
-    auto minorA = FacultyA::_achieveDegree(false).intersect(allMajor);
-    auto minorB = FacultyB::_achieveDegree(false).intersect(allMajor);
-    auto minorC = FacultyC::_achieveDegree(false).intersect(allMajor);
-
-    //计算未获得学位的学生集合。注意只需要减去获得主修学位学生即可，因为辅修学生是主修学生的子集。
-    auto noDegree = _studentList.keys().toSet().subtract(allMajor);
-
-    auto majorDegreeLines = _getReportLine(majorA, FacultyA::getFacultyName(), isHTML, true);
-    majorDegreeLines.append(_getReportLine(majorB, FacultyB::getFacultyName(), isHTML, true));
-    majorDegreeLines.append(_getReportLine(majorC, FacultyC::getFacultyName(), isHTML, true));
-
-    auto minorDegreeLines = _getReportLine(minorA, FacultyA::getFacultyName(), isHTML, false);
-    minorDegreeLines.append(_getReportLine(minorB, FacultyB::getFacultyName(), isHTML, false));
-    minorDegreeLines.append(_getReportLine(minorC, FacultyC::getFacultyName(), isHTML, false));
-
-    auto noDegreeLines = _getReportLine(noDegree, "无", isHTML, true);
-
-    if(isHTML)
-        return QString("<h1 align=\"center\">成绩统计报告</h1>"
-                       "<h2>获得主修学位学生</h2><ol>%1</ol>"
-                       "<h2>获得辅修学位学生</h2><ol>%2</ol>"
-                       "<h2>未获得学位学生</h2><ol>%3</ol>")
-                .arg(majorDegreeLines.join("\n"))
-                .arg(minorDegreeLines.join("\n"))
-                .arg(noDegreeLines.join("\n"));
-    else
-        return (majorDegreeLines + minorDegreeLines + noDegreeLines).join("\n");
-}
-
-bool StudentMIS::saveReport() const
-{
-    QFile fObj(_FILENAME_REPORT);
-    if(!fObj.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
-        return false;
-    fObj.write(makeReport(false).toLocal8Bit());
-    fObj.write("\n");
-    return true;
-}
-
 QStringList IFaculty::_findGoodStudents(bool isHTML) const
 {
     QStringList returnBuf;
@@ -338,6 +273,55 @@ QStringList IFaculty::_findFailedStudents(
         }
     }
     return returnBuf;
+}
+
+
+QString StudentMIS::makeReport(bool isHTML) const
+{
+    auto majorA = FacultyA::_achieveDegree(true);
+    auto majorB = FacultyB::_achieveDegree(true);
+    auto majorC = FacultyC::_achieveDegree(true);
+
+    //计算所有获得主修学位的学生集合，用于计算获得辅修学位学生的集合
+    auto allMajor = majorA;
+    allMajor.unite(majorB).unite(majorC);
+    auto minorA = FacultyA::_achieveDegree(false).intersect(allMajor);
+    auto minorB = FacultyB::_achieveDegree(false).intersect(allMajor);
+    auto minorC = FacultyC::_achieveDegree(false).intersect(allMajor);
+
+    //计算未获得学位的学生集合。注意只需要减去获得主修学位学生即可，因为辅修学生是主修学生的子集。
+    auto noDegree = _studentList.keys().toSet().subtract(allMajor);
+
+    auto majorDegreeLines = _getReportLine(majorA, FacultyA::getFacultyName(), isHTML, true);
+    majorDegreeLines.append(_getReportLine(majorB, FacultyB::getFacultyName(), isHTML, true));
+    majorDegreeLines.append(_getReportLine(majorC, FacultyC::getFacultyName(), isHTML, true));
+
+    auto minorDegreeLines = _getReportLine(minorA, FacultyA::getFacultyName(), isHTML, false);
+    minorDegreeLines.append(_getReportLine(minorB, FacultyB::getFacultyName(), isHTML, false));
+    minorDegreeLines.append(_getReportLine(minorC, FacultyC::getFacultyName(), isHTML, false));
+
+    auto noDegreeLines = _getReportLine(noDegree, "无", isHTML, true);
+
+    if(isHTML)
+        return QString("<h1 align=\"center\">成绩统计报告</h1>"
+                       "<h2>获得主修学位学生</h2><ol>%1</ol>"
+                       "<h2>获得辅修学位学生</h2><ol>%2</ol>"
+                       "<h2>未获得学位学生</h2><ol>%3</ol>")
+                .arg(majorDegreeLines.join("\n"))
+                .arg(minorDegreeLines.join("\n"))
+                .arg(noDegreeLines.join("\n"));
+    else
+        return (majorDegreeLines + minorDegreeLines + noDegreeLines).join("\n");
+}
+
+bool StudentMIS::saveReport() const
+{
+    QFile fObj(_FILENAME_REPORT);
+    if(!fObj.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+        return false;
+    fObj.write(makeReport(false).toLocal8Bit());
+    fObj.write("\n");
+    return true;
 }
 
 QStringList StudentMIS::_getReportLine(

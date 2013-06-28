@@ -63,7 +63,8 @@ void StudentMain::on_DegreeStat_clicked()
     statDialog = 0;
 }
 
-void StudentMain::on_StudentList_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+void StudentMain::on_StudentList_currentCellChanged(
+        int currentRow, int currentColumn, int previousRow, int previousColumn)
 {
     if(currentRow != previousRow)
     {
@@ -144,8 +145,9 @@ void StudentMain::on_DeleteStudent_clicked()
     auto item = ui->StudentList->item(row, 1);
     if(item)
     {
-        auto button = QMessageBox::warning(this, "删除学生", "确定要删除学生 " + item->text() + " 吗？",
-                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        auto button = QMessageBox::warning(
+                    this, "删除学生", "确定要删除学生 " + item->text() + " 吗？",
+                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         if(button == QMessageBox::Yes)
         {
             long ID = ui->StudentList->item(row, 0)->text().toLong();
@@ -159,12 +161,14 @@ void StudentMain::on_DeleteStudent_clicked()
 void StudentMain::on_AddMajorScore_clicked()
 {
     bool isOk = false;
-    QString name = QInputDialog::getText(this, "添加科目成绩", "请输入（主修）科目名称：", QLineEdit::Normal, "", &isOk);
+    QString name = QInputDialog::getText(
+                this, "添加科目成绩", "请输入（主修）科目名称：", QLineEdit::Normal, "", &isOk);
     if(!isOk || !name.size())
         return;
 
     QStringList buf;
-    buf << "请输入学生 " << ui->NameBox->text() << " （学号" << ui->IDBox->text() << "）的\n" << name << " （主修）成绩：";
+    buf << "请输入学生 " << ui->NameBox->text()
+        << " （学号" << ui->IDBox->text() << "）的\n" << name << " （主修）成绩：";
     int score = QInputDialog::getInt(this, "添加科目成绩", buf.join(""), 80, 0, 100, 1, &isOk);
     if(!isOk)
         return;
@@ -180,8 +184,9 @@ void StudentMain::on_DeleteMajorScore_clicked()
 {
     int row = ui->MajorScoreList->currentRow();
     auto item = ui->MajorScoreList->item(row, 0);
-    auto button = QMessageBox::warning(this, "删除成绩", "确定要删除" + item->text() + "的成绩吗？",
-                                       QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    auto button = QMessageBox::warning(
+                this, "删除成绩", "确定要删除" + item->text() + "的成绩吗？",
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     if(button == QMessageBox::Yes)
         ui->MajorScoreList->removeRow(row);
 }
@@ -189,12 +194,14 @@ void StudentMain::on_DeleteMajorScore_clicked()
 void StudentMain::on_AddMinorScore_clicked()
 {
     bool isOk = false;
-    QString name = QInputDialog::getText(this, "添加科目成绩", "请输入（辅修）科目名称：", QLineEdit::Normal, "", &isOk);
+    QString name = QInputDialog::getText(
+                this, "添加科目成绩", "请输入（辅修）科目名称：", QLineEdit::Normal, "", &isOk);
     if(!isOk || !name.size())
         return;
 
     QStringList buf;
-    buf << "请输入学生 " << ui->NameBox->text() << " （学号" << ui->IDBox->text() << "）的\n" << name << " （辅修）成绩：";
+    buf << "请输入学生 " << ui->NameBox->text()
+        << " （学号" << ui->IDBox->text() << "）的\n" << name << " （辅修）成绩：";
     int score = QInputDialog::getInt(this, "添加科目成绩", buf.join(""), 80, 0, 100, 1, &isOk);
     if(!isOk)
         return;
@@ -210,8 +217,9 @@ void StudentMain::on_DeleteMinorScore_clicked()
 {
     int row = ui->MinorScoreList->currentRow();
     auto item = ui->MinorScoreList->item(row, 0);
-    auto button = QMessageBox::warning(this, "删除成绩", "确定要删除" + item->text() + "的成绩吗？",
-                                       QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    auto button = QMessageBox::warning(
+                this, "删除成绩", "确定要删除" + item->text() + "的成绩吗？",
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     if(button == QMessageBox::Yes)
         ui->MinorScoreList->removeRow(row);
 }

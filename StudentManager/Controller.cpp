@@ -17,7 +17,7 @@ AdmissionsOfficeController::AdmissionsOfficeController(Ui::StudentMain *ui)
 
 void AdmissionsOfficeController::loadStudentList() const
 {
-    _loadList(_studentBaseObj);
+    _loadStudentList(_studentBaseObj);
 }
 
 void AdmissionsOfficeController::aStudentSelected(long ID) const
@@ -50,7 +50,8 @@ bool AdmissionsOfficeController::saveAStudent()
     else//添加新学生
     {
         _studentBaseObj->addAStudent(
-                    newStudentObj, _stringToFacultyName(_args["major"]), _stringToFacultyName(_args["minor"]));
+                    newStudentObj,
+                    _stringToFacultyName(_args["major"]), _stringToFacultyName(_args["minor"]));
         loadStudentList();//重新加载列表
     }
     return true;
@@ -76,7 +77,7 @@ FacultyController::FacultyController(Ui::StudentMain *ui, FacultyName facultyNam
 
 void FacultyController::loadStudentList() const
 {
-    _loadList(_facultyObj);
+    _loadStudentList(_facultyObj);
 }
 
 void FacultyController::aStudentSelected(long ID) const
@@ -166,7 +167,7 @@ DegreesOfficeController::DegreesOfficeController(Ui::StudentMain *ui)
 
 void DegreesOfficeController::loadStudentList() const
 {
-    _loadList(_misObj);
+    _loadStudentList(_misObj);
 }
 
 void DegreesOfficeController::aStudentSelected(long ID) const

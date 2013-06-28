@@ -84,14 +84,6 @@ private:
 
 public:
     Student() = default;
-    /**
-     * @brief Student 使用学生基本信息初始化学生对象
-     * @param name 姓名
-     * @param ID 学号
-     * @param sex 性别(false为男，true为女)
-     * @param age 年龄
-     * @param address 地址
-     */
     Student(const QString &name, long ID, bool sex, int age, const QString &address)
         :_ID(ID), _name(name), _address(address), _sex(sex), _age(age) {}
 
@@ -144,16 +136,7 @@ class StudentBase
 private:
     static const char *_FILENAME;
 
-    /**
-     * @brief _loadDataFromFile 从@var StudentBase::_FILENAME 指定的文件名读取学生基本信息。
-     * @return 读取成功返回true，失败返回false。
-     */
     bool _loadDataFromFile();
-
-    /**
-     * @brief _saveDataToFile 把数据保存到本地文件中
-     * @return 保存成功返回true，失败返回false
-     */
     bool _saveDataToFile() const;
 
 protected:
@@ -180,13 +163,7 @@ public:
      * @param count size_t类型的指针，返回学生总数。
      */
     template<typename FunType>
-    void loadStudentList(FunType f, size_t *count = 0) const
-    {
-        for(auto i : _const(_studentList))
-            f(i.getID(), i.getName());
-        if(count)
-            *count = _studentList.size();
-    }
+    void loadStudentList(FunType f, size_t *count = 0) const;
 
     /**
      * @brief loadAStudentDetails 通过传入的操作加载指定学号学生的详细信息
@@ -196,28 +173,11 @@ public:
      *找到对应学号的学生，则不会调用此函数。
      */
     template<typename FunType>
-    void loadAStudentDetails(long ID, FunType f) const
-    {
-        auto i = _studentList.constFind(ID);
-        if(i != _studentList.constEnd())
-            f(*i);
-    }
+    void loadAStudentDetails(long ID, FunType f) const;
 
-    /**
-     * @brief saveAStudentDetails 保存一个学生的详细信息
-     * @param s @class Student "Student.h" 对象，待保存的学生信息。
-     */
     void saveAStudentDetails(Student &s);
-
     void addAStudent(Student &s, FacultyName majorFaculty, FacultyName minorFaculty);
-
     void deleteAStudent(long ID);
-
-    /**
-     * @brief testStudentID 检查指定的学号是否存在当前的学生列表中
-     * @param ID 指定的学号
-     * @return 存在返回true，不存在返回false
-     */
     bool checkIDExists(long ID) const;
 
     size_t getStudentCount() const
@@ -231,7 +191,7 @@ public:
  * @brief The IFaculty class
  *
  *专业类(Faculty*)的基类。包含成绩列表以及相关的各种操作。
- *由于不同专业的数据不共享，专业类**不**应该对本类进行虚继承。
+ *由于不同专业的数据不共享，专业类*不*应该对本类进行虚继承。
  */
 class IFaculty: virtual protected StudentBase
 {
@@ -253,7 +213,7 @@ protected:
      *因此需要计算与所有专业获得主修学位学生集合的交集。
      */
     virtual QSet<long> _achieveDegree(bool isMajor) const;
-    int _s, _k;
+    int _majorRequire, _minorRequire;
     QString _facultyName;
     const QString _FILENAME_MAJOR;
     const QString _FILENAME_MINOR;
@@ -267,11 +227,11 @@ public:
      * @param s 主修课程数
      * @param k 辅修课程数
      */
-    IFaculty(int s, int k, const QString &facultyName,
+    IFaculty(int majorRequire, int minorRequire, const QString &facultyName,
              const QString &fileNameMajor, const QString &fileNameMinor,
              const QString &fileNameGood,
              const QString &fileNameMajorFail, const QString &fileNameMinorFail)
-        : _s(s), _k(k), _facultyName(facultyName),
+        : _majorRequire(majorRequire), _minorRequire(minorRequire), _facultyName(facultyName),
           _FILENAME_MAJOR(fileNameMajor), _FILENAME_MINOR(fileNameMinor),
           _FILENAME_GOOD(fileNameGood),
           _FILENAME_MAJOR_FAIL(fileNameMajorFail), _FILENAME_MINOR_FAIL(fileNameMinorFail) {}
@@ -297,34 +257,7 @@ public:
     }
 
     template<typename FunType>
-    QString loadAStudentScores(long ID, bool isMajor, FunType f, size_t *count = 0) const
-    {
-        auto pStudentScores = isMajor ? &_majorStudentScores : &_minorStudentScores;
-        if(pStudentScores->contains(ID))
-        {
-            for(auto i = pStudentScores->value(ID).constBegin();
-                i != pStudentScores->value(ID).constEnd(); ++i)
-                f(i.key(), i.value());
-
-            if(count)
-                *count = pStudentScores->value(ID).size();
-
-            return _facultyName;
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    size_t getScoreListCount(long ID, bool isMajor) const
-    {
-        auto p = isMajor ? &_majorStudentScores : &_minorStudentScores;
-        if(p->contains(ID))
-            return (*p)[ID].size();
-        else
-            return 0;
-    }
+    QString loadAStudentScores(long ID, bool isMajor, FunType f, size_t *count = 0) const;
 
     QString getFacultyName() const
     {
@@ -337,10 +270,6 @@ public:
     using StudentBase::getStudentCount;
 };
 
-
-/**
- * @brief The FacultyA class
- */
 class FacultyA: public IFaculty
 {
 public:
@@ -399,7 +328,39 @@ public:
 
 };
 
+/**
+ * @brief The StudentMIS class
+ *
+ *学生信息管理类。提供学生所有信息的只读操作，以及统计功能。
+ */
+class StudentMIS: protected FacultyA, protected FacultyB, protected FacultyC
+{
+private:
+    void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
+    QStringList _getReportLine(
+            const QSet<long> &idList, const QString FacultyName, bool isHTML, bool isMajor) const;
+    const QString _FILENAME_REPORT = "Degree.dat";
 
+public:
+    using StudentBase::loadStudentList;
+    using StudentBase::loadAStudentDetails;
+    using StudentBase::checkIDExists;
+    using StudentBase::getStudentCount;
+
+    template<typename FunType>
+    QString loadAStudentScores(long ID, bool isMajor, FunType f, size_t *count = 0) const;
+
+    QString makeReport(bool isHTML) const;
+    bool saveReport() const;
+};
+
+
+/**
+ * @brief _facultyNameToFacultyObject 根据@enum FacultyName "Student.h" 类型标识的
+ *专业名称创建专业对象。
+ * @param name 专业名称
+ * @return 创建的专业类型指针。
+ */
 inline IFaculty * _facultyNameToFacultyObject(FacultyName name)
 {
     switch(name)
@@ -417,34 +378,57 @@ inline IFaculty * _facultyNameToFacultyObject(FacultyName name)
 }
 
 
-class StudentMIS: protected FacultyA, protected FacultyB, protected FacultyC
+//以下为函数模板的实现
+template<typename FunType>
+QString IFaculty::loadAStudentScores(
+        long ID, bool isMajor, FunType f, size_t *count) const
 {
-private:
-    void saveAStudentScores(long ID, bool isMajor, QMap<QString, int> scores);
-    QStringList _getReportLine(
-            const QSet<long> &idList, const QString FacultyName, bool isHTML, bool isMajor) const;
-    const QString _FILENAME_REPORT = "Degree.dat";
-
-public:
-    using StudentBase::loadStudentList;
-    using StudentBase::loadAStudentDetails;
-    using StudentBase::checkIDExists;
-    using StudentBase::getStudentCount;
-
-    template<typename FunType>
-    QString loadAStudentScores(long ID, bool isMajor, FunType f, size_t *count = 0) const
+    auto pStudentScores = isMajor ? &_majorStudentScores : &_minorStudentScores;
+    if(pStudentScores->contains(ID))
     {
-        QString facultyName = FacultyA::loadAStudentScores(ID, isMajor, f, count);
-        if(!facultyName.size())
-            facultyName = FacultyB::loadAStudentScores(ID, isMajor, f, count);
-        if(!facultyName.size())
-            facultyName = FacultyC::loadAStudentScores(ID, isMajor, f, count);
-        return facultyName;
-    }
+        for(auto i = pStudentScores->value(ID).constBegin();
+            i != pStudentScores->value(ID).constEnd(); ++i)
+            f(i.key(), i.value());
 
-    QString makeReport(bool isHTML) const;
-    bool saveReport() const;
-};
+        if(count)
+            *count = pStudentScores->value(ID).size();
+
+        return _facultyName;
+    }
+    else
+    {
+        return "";
+    }
+}
+
+template<typename FunType>
+void StudentBase::loadStudentList(FunType f, size_t *count) const
+{
+    for(auto i : _const(_studentList))
+        f(i.getID(), i.getName());
+    if(count)
+        *count = _studentList.size();
+}
+
+template<typename FunType>
+void StudentBase::loadAStudentDetails(long ID, FunType f) const
+{
+    auto i = _studentList.constFind(ID);
+    if(i != _studentList.constEnd())
+        f(*i);
+}
+
+template<typename FunType>
+QString StudentMIS::loadAStudentScores(
+        long ID, bool isMajor, FunType f, size_t *count) const
+{
+    QString facultyName = FacultyA::loadAStudentScores(ID, isMajor, f, count);
+    if(!facultyName.size())
+        facultyName = FacultyB::loadAStudentScores(ID, isMajor, f, count);
+    if(!facultyName.size())
+        facultyName = FacultyC::loadAStudentScores(ID, isMajor, f, count);
+    return facultyName;
+}
 
 }
 #endif // STUDENT_H
