@@ -12,3 +12,8 @@ StatisticsDialog::~StatisticsDialog()
 {
     delete ui;
 }
+
+void StatisticsDialog::setContent(const QString &content)
+{
+    ui->ReportBox->setHtml(content);
+}

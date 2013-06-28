@@ -14,6 +14,7 @@ class StatisticsDialog : public QDialog
 public:
     explicit StatisticsDialog(QWidget *parent = 0);
     ~StatisticsDialog();
+    void setContent(const QString & content);
     
 private:
     Ui::StatisticsDialog *ui;
