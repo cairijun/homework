@@ -25,7 +25,7 @@ protected:
     Ui::StudentMain *_ui = 0;
 
     /**
-     * @brief _args 用于保存额外的参数
+     * @brief 用于保存额外的参数
      *
      *为了保持接口一致，视图层与控制器层交互时，如果有某些独立于兄弟类型的
      *特殊参数需要传递，应通过重载的[]运算符使用这一保护成员进行传递。
@@ -54,7 +54,7 @@ public:
     virtual bool checkIDExists(long ID) = 0;
 
     /**
-     * @brief operator [] 重载的[]运算符，用于访问额外参数
+     * @brief 重载的[]运算符，用于访问额外参数
      * @param argKey 参数的键
      * @return 对参数值的引用
      */

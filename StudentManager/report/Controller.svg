@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Bouml (http://bouml.free.fr/) -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="624" height="695" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<g>
+	<rect fill="none" stroke="black" stroke-width="1" stroke-opacity="1" x="80" y="226" width="442" height="260" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" font-style="italic" text-anchor="middle" x="301" y="238">Student::IController</text>
+	<line stroke="black" stroke-opacity="1" x1="80" y1="245" x2="522" y2="245" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="257">#</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="100" y="257">_ui : Ui::StudentMain=  0</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="274">#</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="100" y="274">&lt;&lt;QMap&gt;&gt;</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="170" y="274">_args : QString, QString</text>
+	<line stroke="black" stroke-opacity="1" x1="80" y1="281" x2="522" y2="281" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="293">#</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="100" y="293">&lt;&lt;template&gt;&gt;</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="188" y="293">_loadStudentList(modelObj : T) : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="310">#</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="100" y="310">&lt;&lt;template&gt;&gt;</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="188" y="310">_loadBaseInformation(modelObj : T, ID : long) : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="327">#</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="100" y="327">&lt;&lt;template&gt;&gt;</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="188" y="327">_loadScores(modelObj : T, ID : long, isMajor : bool) : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="344">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="100" y="344">IController(ui : Ui::StudentMain)</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="361">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="100" y="361">~IController()</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="378">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-style="italic" x="100" y="378">loadStudentList() : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="395">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-style="italic" x="100" y="395">aStudentSelected(ID : long) : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="412">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-style="italic" x="100" y="412">saveAStudent() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="429">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-style="italic" x="100" y="429">displayReport() : QString</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="446">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-style="italic" x="100" y="446">saveReport() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="463">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-style="italic" x="100" y="463">checkIDExists(ID : long) : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="84" y="480">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="100" y="480">operator [](argKey : QString) : QString</text>
+</g>
+<g>
+	<rect fill="none" stroke="black" stroke-width="1" stroke-opacity="1" x="306" y="8" width="306" height="192" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="459" y="20">Student::AdmissionsOfficeController</text>
+	<line stroke="black" stroke-opacity="1" x1="306" y1="27" x2="612" y2="27" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="39">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="39">_studentBaseObj : Student::StudentBase</text>
+	<line stroke="black" stroke-opacity="1" x1="306" y1="46" x2="612" y2="46" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="58">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="58">displayReport() : QString</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="75">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="75">saveReport() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="92">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="92">AdmissionsOfficeController(ui : Ui::StudentMain)</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="109">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="109">~AdmissionsOfficeController()</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="126">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="126">loadStudentList() : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="143">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="143">aStudentSelected(ID : long) : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="160">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="160">saveAStudent() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="177">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="177">checkIDExists(ID : long) : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="310" y="194">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="326" y="194">deleteStudent(ID : long) : void</text>
+</g>
+<g>
+	<rect fill="none" stroke="black" stroke-width="1" stroke-opacity="1" x="71" y="507" width="462" height="176" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="302" y="519">Student::FacultyController</text>
+	<line stroke="black" stroke-opacity="1" x1="71" y1="526" x2="533" y2="526" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="538">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="538">_facultyObj : Student::IFaculty</text>
+	<line stroke="black" stroke-opacity="1" x1="71" y1="545" x2="533" y2="545" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="557">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="557">FacultyController(ui : Ui::StudentMain, facultyName : Student::FacultyName)</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="574">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="574">~FacultyController()</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="591">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="591">loadStudentList() : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="608">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="608">aStudentSelected(ID : long) : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="625">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="625">saveAStudent() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="642">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="642">displayReport() : QString</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="659">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="659">saveReport() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="75" y="676">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="91" y="676">checkIDExists(ID : long) : bool</text>
+</g>
+<g>
+	<rect fill="none" stroke="black" stroke-width="1" stroke-opacity="1" x="11" y="24" width="288" height="176" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="155" y="36">Student::DegreesOfficeController</text>
+	<line stroke="black" stroke-opacity="1" x1="11" y1="43" x2="299" y2="43" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="55">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="55">_misObj : Student::StudentMIS</text>
+	<line stroke="black" stroke-opacity="1" x1="11" y1="62" x2="299" y2="62" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="74">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="74">saveAStudent() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="91">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="91">DegreesOfficeController(ui : Ui::StudentMain)</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="108">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="108">~DegreesOfficeController()</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="125">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="125">loadStudentList() : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="142">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="142">aStudentSelected(ID : long) : void</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="159">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="159">displayReport() : QString</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="176">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="176">saveReport() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="15" y="193">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="31" y="193">checkIDExists(ID : long) : bool</text>
+</g>
+<g>
+	<line stroke="black" stroke-opacity="1" x1="396" y1="200" x2="382" y2="220" />
+	<line stroke="black" stroke-opacity="1" x1="379" y1="225" x2="387" y2="223" />
+	<line stroke="black" stroke-opacity="1" x1="379" y1="225" x2="377" y2="216" />
+	<line stroke="black" stroke-opacity="1" x1="387" y1="223" x2="377" y2="216" />
+</g>
+<g>
+	<line stroke="black" stroke-opacity="1" x1="301" y1="506" x2="301" y2="492" />
+	<line stroke="black" stroke-opacity="1" x1="301" y1="486" x2="295" y2="492" />
+	<line stroke="black" stroke-opacity="1" x1="301" y1="486" x2="307" y2="492" />
+	<line stroke="black" stroke-opacity="1" x1="295" y1="492" x2="307" y2="492" />
+</g>
+<g>
+	<line stroke="black" stroke-opacity="1" x1="206" y1="200" x2="217" y2="219" />
+	<line stroke="black" stroke-opacity="1" x1="220" y1="225" x2="222" y2="216" />
+	<line stroke="black" stroke-opacity="1" x1="220" y1="225" x2="211" y2="222" />
+	<line stroke="black" stroke-opacity="1" x1="222" y1="216" x2="211" y2="222" />
+</g>
+</svg>

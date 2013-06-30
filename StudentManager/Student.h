@@ -34,9 +34,9 @@ class FacultyC;
 class StudentMIS;
 
 /**
- * @brief _stringToFacultyName 把字符串表示的专业名称转换成@enum FacultyName "Student.h" 类型
+ * @brief 把字符串表示的专业名称转换成 FacultyName 类型
  * @param strName 字符串表示的专业名称，接受Faculty X、Faculty_X、Faculty_name_X的形式，不分大小写
- * @return strName表示的专业类型。
+ * @return strName 表示的专业类型。
  */
 inline FacultyName _stringToFacultyName(const QString &strName)
 {
@@ -58,9 +58,9 @@ return FACULTY_NAME_##x
 }
 
 /**
- * @brief _const 返回一个变量的常量引用，协助进行自动类型推断。
- * @param o 容器
- * @return o的常量引用
+ * @brief 返回一个变量的常量引用，协助进行自动类型推断。
+ * @param o 待转换的变量
+ * @return o 的常量引用
  */
 template<typename T>
 inline const T& _const(const T& o)
@@ -127,8 +127,8 @@ public:
 /**
  * @brief The StudentBase class
  *
- *提供招生办工作人员操作的接口，同时也是@class FacultyA "Student.h",
- *@class FacultyB "Student.h", @class FacultyC "Student.h", @class StudentMIS "Student.h"
+ *提供招生办工作人员操作的接口，同时也是 FacultyA,
+ * FacultyB, FacultyC, StudentMIS
  *的虚基类。
  */
 class StudentBase
@@ -156,9 +156,9 @@ public:
     }
 
     /**
-     * @brief loadStudentList 通过传入的操作把学生姓名学号加载到列表中
+     * @brief 通过传入的操作把学生姓名学号加载到列表中
      * @param f 一个类型为void (*)(long, QString)的函数指针或有兼容原型
-     *的函数、函数对象、lambda表达式。loadStudentList函数会对每个学生
+     *的函数、函数对象、lambda表达式。loadStudentList 函数会对每个学生
      *调用f，并传入学号和学生姓名。
      * @param count size_t类型的指针，返回学生总数。
      */
@@ -166,7 +166,7 @@ public:
     void loadStudentList(FunType f, size_t *count = 0) const;
 
     /**
-     * @brief loadAStudentDetails 通过传入的操作加载指定学号学生的详细信息
+     * @brief 通过传入的操作加载指定学号学生的详细信息
      * @param ID 学生学号
      * @param f 一个类型为void (*)(const Student &)的函数指针或有兼容原型
      *的函数、函数对象、lambda表达式。提供加载学生详情的具体操作。如果没有
@@ -206,7 +206,7 @@ protected:
     virtual bool _saveDataToFile(bool isMajor) const;
 
     /**
-     * @brief _achieveDegree 获取获得学位的学生集合
+     * @brief 获取获得学位的学生集合
      * @param isMajor 是否主修学生
      * @return 获得学位的学生的学号集合
      * @warning 查询辅修学位时，不会排除未获得主修学位的学生，
@@ -223,7 +223,7 @@ protected:
 
 public:
     /**
-     * @brief IFaculty 通过课程设置初始化IFaculty类
+     * @brief 通过课程设置初始化 IFaculty 类
      * @param s 主修课程数
      * @param k 辅修课程数
      */
@@ -356,8 +356,7 @@ public:
 
 
 /**
- * @brief _facultyNameToFacultyObject 根据@enum FacultyName "Student.h" 类型标识的
- *专业名称创建专业对象。
+ * @brief 根据 FacultyName 类型标识的专业名称创建专业对象。
  * @param name 专业名称
  * @return 创建的专业类型指针。
  */

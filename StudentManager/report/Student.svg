@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Bouml (http://bouml.free.fr/) -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="473" height="249" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<g>
+	<rect fill="none" stroke="black" stroke-width="1" stroke-opacity="1" x="21" y="11" width="440" height="226" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="241" y="23">StudentManager::Student</text>
+	<line stroke="black" stroke-opacity="1" x1="21" y1="30" x2="461" y2="30" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="42">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="42">_ID : long</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="59">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="59">_sex : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="76">-</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="76">_age : int</text>
+	<line stroke="black" stroke-opacity="1" x1="21" y1="83" x2="461" y2="83" />
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="95">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="95">Student()</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="112">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="112">Student(name : QString, ID : long, sex : bool, age : int, address : QString)</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="129">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="129">getName() : QString</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="146">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="146">getID() : long</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="163">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="163">getSex() : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="180">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="180">getAddress() : QString</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="197">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="197">getAge() : int</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="214">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="214">operator ==(other : Student::Student) : bool</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" font-weight="bold" x="25" y="231">+</text>
+	<text font-family="Sans" font-size="12" fill="#000000" xml:space="preserve" x="41" y="231">operator &lt;(other : Student::Student) : bool</text>
+</g>
+</svg>
