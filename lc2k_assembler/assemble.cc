@@ -21,15 +21,13 @@ using std::set;
 class SyntaxError: public std::runtime_error
 {
     public:
-        SyntaxError(const string &msg)
-            :runtime_error(msg) {}
+        SyntaxError(const string &msg): runtime_error(msg) {}
 };
 
 class IOError: public std::runtime_error
 {
     public:
-        IOError(const string &msg)
-            :runtime_error(msg) {}
+        IOError(const string &msg): runtime_error(msg) {}
 };
 
 class Assembler
@@ -228,7 +226,6 @@ void Assembler::setAssembly(const vector<string> &as)
 
 void Assembler::synAnalyse()
 {
-    //std::cerr << "Syntax Analyse...\n" << std::endl;
     _ins.empty();
 
     string tmp1, tmp2, tmp3;
@@ -238,7 +235,6 @@ void Assembler::synAnalyse()
         if(!i->size())
             continue;
 
-        //std::cerr << "Assembly: " << *i << std::endl;
         Instruction new_ins;
         std::stringstream buf(*i);
         buf.exceptions(std::stringstream::failbit);
@@ -250,12 +246,9 @@ void Assembler::synAnalyse()
             {
                 new_ins.label = tmp1;
                 buf >> new_ins.instruction;
-                //std::cerr << "Label: " << new_ins.label << std::endl;
             }
             else
                 new_ins.instruction = tmp1;
-
-            //std::cerr << "Instruction: " << new_ins.instruction << std::endl;
 
             if(_R_INS.count(new_ins.instruction) ||
                     _I_INS.count(new_ins.instruction))
@@ -297,18 +290,12 @@ void Assembler::synAnalyse()
             throw SyntaxError(expbuf.str());
         }
 
-        //for(vector<string>::const_iterator i = new_ins.fields.begin();
-        //        i != new_ins.fields.end(); ++i)
-        //    std::cerr << "Field: " << *i << std::endl;
-        //std::cerr << std::endl;
-
         _ins.push_back(new_ins);
     }
 }
 
 void Assembler::passOne()
 {
-    //std::cerr << "Pass 1...\n" << std::endl;
     for(size_t i = 0; i < _ins.size(); ++i)
         if(_ins[i].label.size())
             if(_label_table.count(_ins[i].label))
@@ -320,22 +307,16 @@ void Assembler::passOne()
                 throw SyntaxError(expbuf.str());
             }
             else
-            {
                 _label_table[_ins[i].label] = i;
-                //std::cerr << "Label " << _ins[i].label << " for address " << i << std::endl;
-            }
-    //std::cerr << std::endl;
 }
 
 void Assembler::passTwo()
 {
-    //std::cerr << "Pass 2...\n" << std::endl;
     _mc.empty();
 
     for(vector<Instruction>::const_iterator i = _ins.begin();
             i != _ins.end(); ++i)
     {
-        //std::cerr << "Instruction " << i->instruction << " on " << _mc.size() << std::endl;
         try
         {
         if(i->instruction == "add")
@@ -365,7 +346,6 @@ void Assembler::passTwo()
             expbuf << e.what() << "\non address " << i - _ins.begin() << " (occured in Pass 2).";
             throw SyntaxError(expbuf.str());
         }
-        //std::cerr << "Mechine code: " << static_cast<mc_t_s>(_mc.back()) << std::endl << std::endl;
     }
 }
 
