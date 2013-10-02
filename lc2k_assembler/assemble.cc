@@ -94,6 +94,8 @@ int Assembler::interpreOffsetField(const string &field, bool *pLabelSign)
 {
     bool sign = false;
     int offset = atoi(field.c_str());
+    if(offset > 0x7fff | -offset > 0x8000)
+        throw SyntaxError("Invalid offset: " + field);
     if(!offset && field != "0")
     {
         try
