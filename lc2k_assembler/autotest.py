@@ -39,8 +39,7 @@ class ErrorUndeteced(Exception):
         return 'Failed to detect an error'
 
 def getTempFileName():
-    return os.path.join(tempfile.gettempdir(),
-            tempfile.gettempprefix() + uuid.uuid4().hex)
+    return os.path.join(tempDirObj.name, uuid.uuid4().hex)
 
 def testOutput(infile, outfile):
     tempFileName = getTempFileName()
@@ -80,6 +79,8 @@ def main():
     assembler = sys.argv[1]
     global testDataPath
     testDataPath = sys.argv[2]
+    global tempDirObj
+    tempDirObj = tempfile.TemporaryDirectory()
 
     print('LC2K Assembler Tests')
     failureCount = 0
