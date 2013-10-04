@@ -34,13 +34,6 @@ class Assembler
 {
     struct Instruction
     {
-        Instruction() {}
-        Instruction(
-                const string &_label,
-                const string &_instruction,
-                const vector<string> _fields):
-            label(_label), instruction(_instruction), fields(_fields) {}
-
         string label;
         string instruction;
         vector<string> fields;
@@ -52,12 +45,12 @@ class Assembler
         map<string, size_t> _label_table;
         vector<mc_t> _mc;
 
-        set<string> _INS;
-        set<string> _R_INS;
-        set<string> _I_INS;
-        set<string> _J_INS;
-        set<string> _O_INS;
-        set<string> _PSEUDO_INS;
+        const set<string> _INS = {"add", "nand", "lw", "sw", "beq", "jalr", "noop", "halt", ".fill"};
+        const set<string> _R_INS = {"add", "nand"};
+        const set<string> _I_INS = {"lw", "sw", "beq"};
+        const set<string> _J_INS = {"jalr"};
+        const set<string> _O_INS = {"noop", "halt"};
+        const set<string> _PSEUDO_INS = {".fill"};
 
         inline int interpreOffsetField(const string &field, bool *pLabelSign = 0);
 
@@ -74,7 +67,6 @@ class Assembler
         inline static mc_t convertRegisterField(const string &field);
 
     public:
-        Assembler();
         void setAssembly(const vector<string> &as);
         void synAnalyse();
         void passOne();
@@ -121,7 +113,7 @@ mc_t Assembler::translateAdd(const Instruction &ins)
     mc_t regB = convertRegisterField(ins.fields[1]);
     mc_t regC = convertRegisterField(ins.fields[2]);
 
-    code |= (regA << 19 & 0x00380000) | (regB << 16 & 0x00070000) | (regC & 0x00000007);
+    code |= regA << 19 | regB << 16 | regC;
     return code;
 }
 
@@ -132,7 +124,7 @@ mc_t Assembler::translateNand(const Instruction &ins)
     mc_t regB = convertRegisterField(ins.fields[1]);
     mc_t regC = convertRegisterField(ins.fields[2]);
 
-    code |= (regA << 19 & 0x00380000) | (regB << 16 & 0x00070000) | (regC & 0x00000007);
+    code |= regA << 19 | regB << 16 | regC;
     return code;
 }
 
@@ -143,7 +135,7 @@ mc_t Assembler::translateLw(const Instruction &ins)
     mc_t regB = convertRegisterField(ins.fields[1]);
     int offset = interpreOffsetField(ins.fields[2]);
 
-    code |= (regA << 19 & 0x00380000) | (regB << 16 & 0x00070000) | (offset & 0x0000ffff);
+    code |= regA << 19 | regB << 16 | (offset & 0x0000ffff);
     return code;
 }
 
@@ -154,7 +146,7 @@ mc_t Assembler::translateSw(const Instruction &ins)
     mc_t regB = convertRegisterField(ins.fields[1]);
     int offset = interpreOffsetField(ins.fields[2]);
 
-    code |= (regA << 19 & 0x00380000) | (regB << 16 & 0x00070000) | (offset & 0x0000ffff);
+    code |= regA << 19 | regB << 16 | (offset & 0x0000ffff);
     return code;
 }
 
@@ -169,7 +161,7 @@ mc_t Assembler::translateBeq(const Instruction &ins, size_t pc)
     if(labelSign)
         offset = offset - pc - 1;
 
-    code |= (regA << 19 & 0x00380000) | (regB << 16 & 0x00070000) | (offset & 0x0000ffff);
+    code |= regA << 19 | regB << 16 | (offset & 0x0000ffff);
     return code;
 }
 
@@ -179,7 +171,7 @@ mc_t Assembler::translateJalr(const Instruction &ins)
     mc_t regA = convertRegisterField(ins.fields[0]);
     mc_t regB = convertRegisterField(ins.fields[1]);
 
-    code |= (regA << 19 & 0x00380000) | (regB << 16 & 0x00070000);
+    code |= regA << 19 | (regB << 16 & 0x00070000);
     return code;
 }
 
@@ -198,29 +190,6 @@ mc_t Assembler::translateDotFill(const Instruction &ins)
     return interpreOffsetField(ins.fields[0]);
 }
 
-Assembler::Assembler()
-{
-    _R_INS.insert("add");
-    _R_INS.insert("nand");
-
-    _I_INS.insert("lw");
-    _I_INS.insert("sw");
-    _I_INS.insert("beq");
-
-    _J_INS.insert("jalr");
-
-    _O_INS.insert("halt");
-    _O_INS.insert("noop");
-
-    _PSEUDO_INS.insert(".fill");
-
-    _INS.insert(_R_INS.begin(), _R_INS.end());
-    _INS.insert(_I_INS.begin(), _I_INS.end());
-    _INS.insert(_J_INS.begin(), _J_INS.end());
-    _INS.insert(_O_INS.begin(), _O_INS.end());
-    _INS.insert(_PSEUDO_INS.begin(), _PSEUDO_INS.end());
-}
-
 void Assembler::setAssembly(const vector<string> &as)
 {
     this->_as = as;
@@ -231,14 +200,13 @@ void Assembler::synAnalyse()
     _ins.empty();
 
     string tmp1, tmp2, tmp3;
-    for(vector<string>::const_iterator i = _as.begin();
-            i != _as.end(); ++i)
+    for(auto &i: _as)
     {
-        if(!i->size())
+        if(!i.size())
             continue;
 
         Instruction new_ins;
-        std::stringstream buf(*i);
+        std::stringstream buf(i);
         buf.exceptions(std::stringstream::failbit);
 
         try
@@ -277,8 +245,8 @@ void Assembler::synAnalyse()
             else if(!_O_INS.count(new_ins.instruction))
             {
                 std::stringstream expbuf;
-                expbuf << "Unrecognizable assembly: " << *i
-                    << "\non line " << i - _as.begin()
+                expbuf << "Unrecognizable assembly: " << i
+                    << "\non line " << _ins.size()
                     << " (occured in syntax analysis).";
                 throw SyntaxError(expbuf.str());
             }
@@ -286,8 +254,8 @@ void Assembler::synAnalyse()
         catch(std::stringstream::failure e)
         {
             std::stringstream expbuf;
-            expbuf << "Unrecognizable assembly: " << *i
-                << "\non line " << i - _as.begin()
+            expbuf << "Unrecognizable assembly: " << i
+                << "\non line " << _ins.size()
                 << " (occured in syntax analysis).";
             throw SyntaxError(expbuf.str());
         }
@@ -300,6 +268,7 @@ void Assembler::passOne()
 {
     for(size_t i = 0; i < _ins.size(); ++i)
         if(_ins[i].label.size())
+        {
             if(_label_table.count(_ins[i].label))
             {
                 std::stringstream expbuf;
@@ -310,42 +279,42 @@ void Assembler::passOne()
             }
             else
                 _label_table[_ins[i].label] = i;
+        }
 }
 
 void Assembler::passTwo()
 {
     _mc.empty();
 
-    for(vector<Instruction>::const_iterator i = _ins.begin();
-            i != _ins.end(); ++i)
+    for(auto &i: _ins)
     {
         try
         {
-        if(i->instruction == "add")
-            _mc.push_back(translateAdd(*i));
-        else if(i->instruction == "nand")
-            _mc.push_back(translateNand(*i));
-        else if(i->instruction == "lw")
-            _mc.push_back(translateLw(*i));
-        else if(i->instruction == "sw")
-            _mc.push_back(translateSw(*i));
-        else if(i->instruction == "beq")
-            _mc.push_back(translateBeq(*i, _mc.size()));
-        else if(i->instruction == "jalr")
-            _mc.push_back(translateJalr(*i));
-        else if(i->instruction == "halt")
-            _mc.push_back(translateHalt(*i));
-        else if(i->instruction == "noop")
-            _mc.push_back(translateNoop(*i));
-        else if(i->instruction == ".fill")
-            _mc.push_back(translateDotFill(*i));
-        else
-            throw std::logic_error("Unhandle case: " + i->instruction);
+            if(i.instruction == "add")
+                _mc.push_back(translateAdd(i));
+            else if(i.instruction == "nand")
+                _mc.push_back(translateNand(i));
+            else if(i.instruction == "lw")
+                _mc.push_back(translateLw(i));
+            else if(i.instruction == "sw")
+                _mc.push_back(translateSw(i));
+            else if(i.instruction == "beq")
+                _mc.push_back(translateBeq(i, _mc.size()));
+            else if(i.instruction == "jalr")
+                _mc.push_back(translateJalr(i));
+            else if(i.instruction == "halt")
+                _mc.push_back(translateHalt(i));
+            else if(i.instruction == "noop")
+                _mc.push_back(translateNoop(i));
+            else if(i.instruction == ".fill")
+                _mc.push_back(translateDotFill(i));
+            else
+                throw std::logic_error("Unhandle case: " + i.instruction);
         }
         catch(SyntaxError e)
         {
             std::stringstream expbuf;
-            expbuf << e.what() << "\non address " << i - _ins.begin() << " (occured in Pass 2).";
+            expbuf << e.what() << "\non address " << _mc.size() << " (occured in Pass 2).";
             throw SyntaxError(expbuf.str());
         }
     }
@@ -385,9 +354,8 @@ void writeToFile(const string &filename, const vector<mc_t> &mc)
         ofs.open(filename.c_str());
         //ofs << std::showbase << std::hex;
 
-        for(vector<mc_t>::const_iterator i = mc.begin();
-                i != mc.end(); ++i)
-            ofs << static_cast<mc_t_s>(*i) << '\n';
+        for(auto &code: mc)
+            ofs << static_cast<mc_t_s>(code) << '\n';
         ofs << std::flush;
 
         ofs.close();
