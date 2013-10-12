@@ -12,6 +12,7 @@ testCases = [
         ('negoffset.as', 'negoffset.mc'),
         ('largeprogram.as', 'largeprogram.mc'),
         ('example.as', 'example.mc'),
+        ('32bitfill.as', '32bitfill.mc'),
         ('duplilabel.as', None),
         ('invalidfields.as', None),
         ('invalidins1.as', None),
