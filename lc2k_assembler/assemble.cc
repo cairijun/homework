@@ -52,7 +52,7 @@ class Assembler
         const set<string> _O_INS = {"noop", "halt"};
         const set<string> _PSEUDO_INS = {".fill"};
 
-        inline int interpreOffsetField(const string &field, bool *pLabelSign = 0);
+        inline int interpreOffsetField(const string &field, bool *pLabelSign = 0, bool half_word = true);
 
         inline mc_t translateAdd(const Instruction &ins);
         inline mc_t translateNand(const Instruction &ins);
@@ -82,11 +82,11 @@ mc_t Assembler::convertRegisterField(const string &field)
     return reg;
 }
 
-int Assembler::interpreOffsetField(const string &field, bool *pLabelSign)
+int Assembler::interpreOffsetField(const string &field, bool *pLabelSign, bool half_word)
 {
     bool sign = false;
     int offset = atoi(field.c_str());
-    if(offset > 0x7fff | -offset > 0x8000)
+    if(half_word && (offset > 0x7fff | -offset > 0x8000))
         throw SyntaxError("Invalid offset: " + field);
     if(!offset && field != "0")
     {
@@ -187,7 +187,7 @@ mc_t Assembler::translateNoop(const Instruction &ins)
 
 mc_t Assembler::translateDotFill(const Instruction &ins)
 {
-    return interpreOffsetField(ins.fields[0]);
+    return interpreOffsetField(ins.fields[0], 0, false);
 }
 
 void Assembler::setAssembly(const vector<string> &as)
