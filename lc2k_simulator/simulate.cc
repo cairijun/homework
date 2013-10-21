@@ -66,7 +66,7 @@ void LC2KMachine::handleAdd(mc_t mc)
 {
     mc_t regA = (mc >> 19) & 0x7,
          regB = (mc >> 16) & 0x7,
-         regC = mc * 0x7;
+         regC = mc & 0x7;
 
     _registers[regC] = _registers[regA] + _registers[regB];
     ++_pc;
@@ -76,7 +76,7 @@ void LC2KMachine::handleNand(mc_t mc)
 {
     mc_t regA = (mc >> 19) & 0x7,
          regB = (mc >> 16) & 0x7,
-         regC = mc * 0x7;
+         regC = mc & 0x7;
 
     _registers[regC] = ~(_registers[regA] & _registers[regB]);
     ++_pc;
@@ -220,9 +220,8 @@ std::vector<word_t> readFromFile(const std::string &filename)
 
     std::vector<word_t> words;
     word_t tmp;
-    while(ifs)
+    while(ifs >> tmp)
     {
-        ifs >> tmp;
         words.push_back(tmp);
     }
 
@@ -245,8 +244,8 @@ int main(int argc, char **argv)
 
         while(true)
         {
-            machine.next();
             machine.printState();
+            machine.next();
         }
     }
     catch(MachineHalt)
