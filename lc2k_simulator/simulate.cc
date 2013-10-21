@@ -1,6 +1,7 @@
 #include<iostream>
 #include<vector>
 #include<string>
+#include<cstring>
 #include<fstream>
 #include<algorithm>
 #include<cstdlib>
@@ -8,7 +9,7 @@
 
 #include<stdint.h>
 
-typedef uint_least32_t word_t;
+typedef int_least32_t word_t;
 typedef uint_least32_t mc_t;
 
 class LC2KMachine
@@ -29,8 +30,8 @@ class LC2KMachine
         inline void handleSw(mc_t mc);
         inline void handleBeq(mc_t mc);
         inline void handleJalr(mc_t mc);
-        inline void handleHalt(mc_t mc);
-        inline void handleNoop(mc_t mc);
+        inline void handleHalt();
+        inline void handleNoop();
 
     public:
         LC2KMachine(): _memory(NULL), _ready(false) {}
@@ -41,25 +42,19 @@ class LC2KMachine
         }
 
         void next();
-
-        void setMachineCode(std::vector<mc_t> mc)
-        {
-            if(_ready)
-                throw std::runtime_error("Machine has been ready!");
-
-            _mem_size = mc.size();
-            _memory = new word_t[_mem_size];
-            std::copy(mc.begin(), mc.end(), _memory);
-            _pc = 0;
-            _ready = true;
-        }
-
+        void setMachineCode(std::vector<word_t> mc);
         void printState(std::ostream &os = std::cout);
         void printInitMem(std::ostream &os = std::cout);
 };
 
 class MachineStopped: public std::exception
 { };
+
+class MachineRuntimeError: public std::runtime_error
+{
+    public:
+        MachineRuntimeError(const char *msg): std::runtime_error(msg) {}
+};
 
 void LC2KMachine::handleAdd(mc_t mc)
 {
@@ -85,11 +80,11 @@ void LC2KMachine::handleJalr(mc_t mc)
 {
 }
 
-void LC2KMachine::handleHalt(mc_t mc)
+void LC2KMachine::handleHalt()
 {
 }
 
-void LC2KMachine::handleNoop(mc_t mc)
+void LC2KMachine::handleNoop()
 {
 }
 
@@ -124,23 +119,64 @@ void LC2KMachine::printInitMem(std::ostream &os)
 
 void LC2KMachine::next()
 {
+    if(_pc >= _mem_size)
+        throw MachineRuntimeError("Access invalid memory!");
+
+    mc_t *mc = reinterpret_cast<mc_t *>(_memory + _pc);
+    mc_t opcode = (*mc >> 22) & 0x7;
+    switch(opcode)
+    {
+        case 0:
+            handleAdd(*mc); break;
+        case 1:
+            handleNand(*mc); break;
+        case 2:
+            handleLw(*mc); break;
+        case 3:
+            handleSw(*mc); break;
+        case 4:
+            handleBeq(*mc); break;
+        case 5:
+            handleJalr(*mc); break;
+        case 6:
+            handleHalt(); break;
+        case 7:
+            handleNoop(); break;
+    }
 }
 
-std::vector<mc_t> readFromFile(const std::string &filename)
+void LC2KMachine::setMachineCode(std::vector<word_t> mc)
+{
+    if(_ready)
+        throw std::runtime_error("Machine has been ready!");
+
+    if(_memory)
+        delete [] _memory;
+
+    memset(_registers, 0, sizeof(_registers));
+
+    _mem_size = mc.size();
+    _memory = new word_t[_mem_size];
+    std::copy(mc.begin(), mc.end(), _memory);
+    _pc = 0;
+    _ready = true;
+}
+
+std::vector<word_t> readFromFile(const std::string &filename)
 {
     std::ifstream ifs(filename.c_str());
     if(!ifs)
         throw std::runtime_error("Open file failed: " + filename);
 
-    std::vector<mc_t> _mc;
-    mc_t tmp;
+    std::vector<word_t> words;
+    word_t tmp;
     while(ifs)
     {
         ifs >> tmp;
-        _mc.push_back(tmp);
+        words.push_back(tmp);
     }
 
-    return _mc;
+    return words;
 }
 
 int main(int argc, char **argv)
