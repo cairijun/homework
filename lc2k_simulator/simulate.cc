@@ -129,6 +129,7 @@ void LC2KMachine::handleJalr(mc_t mc)
 
 void LC2KMachine::handleHalt()
 {
+    ++_pc;
     _ready = false;
     throw MachineHalt();
 }
@@ -140,9 +141,6 @@ void LC2KMachine::handleNoop()
 
 void LC2KMachine::printState(std::ostream &os)
 {
-    if(!_ready)
-        throw std::runtime_error("Machine is not ready!");
-
     os << "\n@@@\nstate:\n"
         "\tpc " << _pc << "\n"
         "\tmemory:\n";
@@ -159,9 +157,6 @@ void LC2KMachine::printState(std::ostream &os)
 
 void LC2KMachine::printInitMem(std::ostream &os)
 {
-    if(!_ready)
-        throw std::runtime_error("Machine is not ready!");
-
     for(size_t i = 0; i < _mem_size; ++i)
         os << "memory[" << i << "]=" << _memory[i] << "\n";
     os.flush();
@@ -230,6 +225,9 @@ std::vector<word_t> readFromFile(const std::string &filename)
 
 int main(int argc, char **argv)
 {
+    size_t exec_count = 0;
+    LC2KMachine machine;
+
     if(argc < 2)
     {
         std::cerr << "Usage: simulate file.mc" << std::endl;
@@ -238,18 +236,22 @@ int main(int argc, char **argv)
 
     try
     {
-        LC2KMachine machine;
         machine.setMachineCode(readFromFile(argv[1]));
         machine.printInitMem();
 
         while(true)
         {
+            ++exec_count;
             machine.printState();
             machine.next();
         }
     }
     catch(MachineHalt)
     {
+        std::cout << "machine halted\n"
+            "total of " << exec_count << " instructions executed\n"
+            "final state of machine:" << std::endl;
+        machine.printState();
     }
     catch(std::runtime_error e)
     {
