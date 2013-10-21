@@ -33,6 +33,12 @@ class LC2KMachine
         inline void handleHalt();
         inline void handleNoop();
 
+        int interpretOffset(mc_t mc)
+        {
+            mc_t offset = mc & 0xffff;
+            return (offset & 0x8000) ? offset - 0x10000 : offset;
+        }
+
     public:
         LC2KMachine(): _memory(NULL), _ready(false) {}
         ~LC2KMachine()
@@ -47,7 +53,7 @@ class LC2KMachine
         void printInitMem(std::ostream &os = std::cout);
 };
 
-class MachineStopped: public std::exception
+class MachineHalt: public std::exception
 { };
 
 class MachineRuntimeError: public std::runtime_error
@@ -58,34 +64,78 @@ class MachineRuntimeError: public std::runtime_error
 
 void LC2KMachine::handleAdd(mc_t mc)
 {
+    mc_t regA = (mc >> 19) & 0x7,
+         regB = (mc >> 16) & 0x7,
+         regC = mc * 0x7;
+
+    _registers[regC] = _registers[regA] + _registers[regB];
+    ++_pc;
 }
 
 void LC2KMachine::handleNand(mc_t mc)
 {
+    mc_t regA = (mc >> 19) & 0x7,
+         regB = (mc >> 16) & 0x7,
+         regC = mc * 0x7;
+
+    _registers[regC] = ~(_registers[regA] & _registers[regB]);
+    ++_pc;
 }
 
 void LC2KMachine::handleLw(mc_t mc)
 {
+    mc_t regA = (mc >> 19) & 0x7,
+         regB = (mc >> 16) & 0x7;
+    int addr = _registers[regA];
+
+    addr += interpretOffset(mc);
+    if(addr < 0 || addr >= _mem_size)
+        throw MachineRuntimeError("Access invalid memory!");
+    _registers[regB] = _memory[addr];
+    ++_pc;
 }
 
 void LC2KMachine::handleSw(mc_t mc)
 {
+    mc_t regA = (mc >> 19) & 0x7,
+         regB = (mc >> 16) & 0x7;
+    int addr = _registers[regA];
+
+    addr += interpretOffset(mc);
+    if(addr < 0 || addr >= _mem_size)
+        throw MachineRuntimeError("Access invalid memory!");
+    _memory[addr] = _registers[regB];
+    ++_pc;
 }
 
 void LC2KMachine::handleBeq(mc_t mc)
 {
+    mc_t regA = (mc >> 19) & 0x7,
+         regB = (mc >> 16) & 0x7;
+
+    if(_registers[regA] == _registers[regB])
+        _pc += interpretOffset(mc);
+    ++_pc;
 }
 
 void LC2KMachine::handleJalr(mc_t mc)
 {
+    mc_t regA = (mc >> 19) & 0x7,
+         regB = (mc >> 16) & 0x7;
+
+    _registers[regB] = _pc + 1;
+    _pc = _registers[regA];
 }
 
 void LC2KMachine::handleHalt()
 {
+    _ready = false;
+    throw MachineHalt();
 }
 
 void LC2KMachine::handleNoop()
 {
+    ++_pc;
 }
 
 void LC2KMachine::printState(std::ostream &os)
@@ -199,7 +249,7 @@ int main(int argc, char **argv)
             machine.printState();
         }
     }
-    catch(MachineStopped)
+    catch(MachineHalt)
     {
     }
     catch(std::runtime_error e)
