@@ -40,7 +40,7 @@ class LC2KMachine
         }
 
     public:
-        LC2KMachine(): _memory(NULL), _ready(false) {}
+        LC2KMachine(): _memory(new word_t[NUMMEMORY]), _ready(false) {}
         ~LC2KMachine()
         {
             if(_memory)
@@ -89,7 +89,7 @@ void LC2KMachine::handleLw(mc_t mc)
     int addr = _registers[regA];
 
     addr += interpretOffset(mc);
-    if(addr < 0 || addr >= _mem_size)
+    if(addr < 0 || addr >= NUMMEMORY)
         throw MachineRuntimeError("Access invalid memory!");
     _registers[regB] = _memory[addr];
     ++_pc;
@@ -102,7 +102,7 @@ void LC2KMachine::handleSw(mc_t mc)
     int addr = _registers[regA];
 
     addr += interpretOffset(mc);
-    if(addr < 0 || addr >= _mem_size)
+    if(addr < 0 || addr >= NUMMEMORY)
         throw MachineRuntimeError("Access invalid memory!");
     _memory[addr] = _registers[regB];
     ++_pc;
@@ -164,7 +164,7 @@ void LC2KMachine::printInitMem(std::ostream &os)
 
 void LC2KMachine::next()
 {
-    if(_pc >= _mem_size)
+    if(_pc >= NUMMEMORY)
         throw MachineRuntimeError("Access invalid memory!");
 
     mc_t *mc = reinterpret_cast<mc_t *>(_memory + _pc);
@@ -195,13 +195,10 @@ void LC2KMachine::setMachineCode(std::vector<word_t> mc)
     if(_ready)
         throw std::runtime_error("Machine has been ready!");
 
-    if(_memory)
-        delete [] _memory;
-
     memset(_registers, 0, sizeof(_registers));
+    memset(_memory, 0, sizeof(word_t) * NUMMEMORY);
 
     _mem_size = mc.size();
-    _memory = new word_t[_mem_size];
     std::copy(mc.begin(), mc.end(), _memory);
     _pc = 0;
     _ready = true;
