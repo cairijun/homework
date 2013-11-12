@@ -147,7 +147,168 @@ int convertNum(int num)
     return(num);
 }
 
+#define _S(name) name: printState(&state, #name)
+#define _DISPATCH(code, label) if((state.instrReg & 0x1C00000) == (code << 22)) goto label
+#define _REG1 state.reg[(state.instrReg >> 19) & 0x7]
+#define _REG2 state.reg[(state.instrReg >> 16) & 0x7]
+#define _DES_REG state.reg[state.instrReg & 0x7]
+#define _OFFSET convertNum(state.instrReg & 0xffff)
 void run(stateType state)
 {
-}
+    int bus, memState;
 
+_S(fetch);
+    bus = state.pc++;
+    state.memoryAddress = bus;
+    memoryAccess(&state, 1);
+    goto fetch_wait;
+
+_S(fetch_wait);
+    if(memoryAccess(&state, 1))
+    {
+        bus = state.memoryData;
+        state.instrReg = bus;
+        goto dispatch;
+    }
+    goto fetch_wait;
+
+_S(dispatch);
+    _DISPATCH(0x0, add);
+    _DISPATCH(0x1, nand);
+    _DISPATCH(0x2, lw);
+    _DISPATCH(0x3, sw);
+    _DISPATCH(0x4, beq);
+    _DISPATCH(0x5, jalr);
+    _DISPATCH(0x6, halt);
+    _DISPATCH(0x7, noop);
+
+
+_S(add);
+    bus = _REG1;
+    state.aluOperand = bus;
+    goto add_cal;
+
+_S(add_cal);
+    bus = _REG2;
+    state.aluResult = state.aluOperand + bus;
+    goto add_finish;
+
+_S(add_finish);
+    bus = state.aluResult;
+    _DES_REG = bus;
+    goto fetch;
+
+
+_S(nand);
+    bus = _REG1;
+    state.aluOperand = bus;
+    goto nand_cal;
+
+_S(nand_cal);
+    bus = _REG2;
+    state.aluResult = ~(state.aluOperand & bus);
+    goto nand_finish;
+
+_S(nand_finish);
+    bus = state.aluResult;
+    _DES_REG = bus;
+    goto fetch;
+
+
+_S(lw);
+    bus = _REG1;
+    state.aluOperand = bus;
+    goto lw_cal_addr;
+
+_S(lw_cal_addr);
+    bus = _OFFSET;
+    state.aluResult = state.aluOperand + bus;
+    goto lw_read;
+
+_S(lw_read);
+    bus = state.aluResult;
+    state.memoryAddress = bus;
+    memoryAccess(&state, 1);
+    goto lw_read_wait;
+
+_S(lw_read_wait);
+    if(!memoryAccess(&state, 1))
+        goto lw_read_wait;
+    bus = state.memoryData;
+    _REG2 = bus;
+    goto fetch;
+
+
+_S(sw);
+    bus = _REG1;
+    state.aluOperand = bus;
+    goto sw_cal_addr;
+
+_S(sw_cal_addr);
+    bus = _OFFSET;
+    state.aluResult = state.aluOperand + bus;
+    goto sw_set_addr;
+
+_S(sw_set_addr);
+    bus = state.aluResult;
+    state.memoryAddress = bus;
+    goto sw_store;
+
+_S(sw_store);
+    bus = _REG2;
+    state.memoryData = bus;
+    memoryAccess(&state, 0);
+    goto sw_store_wait;
+
+_S(sw_store_wait);
+    if(!memoryAccess(&state, 0))
+        goto sw_store_wait;
+    goto fetch;
+
+
+_S(beq);
+    bus = _REG1;
+    state.aluOperand = bus;
+    goto beq_cal_diff;
+
+_S(beq_cal_diff);
+    bus = _REG2;
+    state.aluResult = state.aluOperand - bus;
+    goto beq_check;
+
+_S(beq_check);
+    if(state.aluResult)
+        goto fetch;
+    bus = _OFFSET;
+    state.aluOperand = bus;
+    goto beq_cal_addr;
+
+_S(beq_cal_addr);
+    bus = state.pc;
+    state.aluResult = state.aluOperand + bus;
+    goto beq_branch;
+
+_S(beq_branch);
+    bus = state.aluResult;
+    state.pc = bus;
+    goto fetch;
+
+
+_S(jalr);
+    bus = state.pc;
+    _REG2 = bus;
+    goto jalr_branch;
+
+_S(jalr_branch);
+    bus = _REG1;
+    state.pc = bus;
+    goto fetch;
+
+
+_S(halt);
+    return;
+
+
+_S(noop);
+    goto fetch;
+}
