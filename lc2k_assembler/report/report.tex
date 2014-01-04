@@ -1,0 +1,139 @@
+\documentclass[a4paper]{article}
+
+\usepackage[top=1.2in, bottom=1.2in, left=1in, right=1in]{geometry}
+\usepackage{graphicx, minted}
+\usepackage[T1]{fontenc}
+
+\usemintedstyle{tango}
+
+\title{LC2K Assembler}
+\author{Rijun Cai\\12348003}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+In this laboratory, an LC2K assembler was implemented in C++. In the following, I will give some detailed explaination
+of my source code of the assembler.
+
+\section{Source Code Explaination}
+\subsection{Types \& Classes Summary}
+To organized the program better, several types and classes are defined. Here is a list of them.
+
+\begin{description}
+    \item[\texttt{mc\_t}] An alias of \verb|uint_least32_t|. The type of a machine code.
+    \item[\texttt{mc\_t\_s}] An alias of \verb|int_least32_t|. A signed version of \verb|mc_t|. Used to output.
+    \item[\texttt{SyntaxError}] Exception to indicate the syntax errors in the input.
+    \item[\texttt{IOError}] Exception to indicate the errors occur in IO\@.
+    \item[\texttt{Assembler}] The class of an assembler. For more details, see~\ref{assembler_class}.
+    \item[\texttt{Assembler.Instruction}] The class of an instruction.
+\end{description}
+
+\subsection{Workflow}
+The \verb|main| function will first read the \verb|.asm| file with \verb|readFromFile| function.
+Then an assembler will be created and fed with the strings of the input file. Then the assembler will analyse
+the input strings with \verb|Assembler.synAnalyse|. Then the Pass One and Pass Two processes will be executed and
+the machine codes will be generated. Finally, \verb|writeToFile| will be called to write the machine codes to the
+output file. Here is the main part of the \verb|main| function.
+
+\begin{minted}{cpp}
+try
+{
+    vector<string> as = readFromFile(argv[1]);
+    Assembler assembler;
+    assembler.setAssembly(as);
+
+    assembler.synAnalyse();
+    assembler.passOne();
+    assembler.passTwo();
+
+    writeToFile(argv[2], assembler.getMechineCode());
+}
+catch(SyntaxError e)
+{
+    std::cerr << "Error occured when assembling.\n" << e.what() << std::endl;
+    return EXIT_FAILURE;
+}
+catch(IOError e)
+{
+    std::cerr << "IOError occured: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+}
+\end{minted}
+
+\subsection{\texttt{Assembler} Class in Detail}\label{assembler_class}
+\verb|Assembler| class (along with \verb|Assembler.Instruction| structure) implements the main functions of the
+assembler. Here are some details of it.
+
+The \verb|*_INS| sets will be initialized when the assembler is constructed, and will be used to identify
+the type of the instructions.
+
+In the syntax analysis process (\verb|synAnalyse| function), every line of the assembly code will be
+parsed as list of string tokens by \verb|std::stringstream|. Then the first token will be checked and
+if it is a name of an instruction, the following fields will be treated as the fields of the instruction,
+otherwise, the first token will be treated as a label. The result of \verb|synAnalyse| will be a list of
+\verb|Instruction| (\verb|Assembler._ins|).
+
+In \verb|passOne|, every label will be checked if it is duplicated and then mapped to the address of the
+instruction. The result will be stored in \verb|Assembler._label_table|.
+
+In \verb|passTwo|, every instruction will be passed to the corresponding translation function
+and translated into a machine code.
+
+The definitation of \verb|Assembler| class is as follow.
+\begin{minted}{cpp}
+class Assembler
+{
+    struct Instruction
+    {
+        Instruction() {}
+        Instruction(
+                const string &_label,
+                const string &_instruction,
+                const vector<string> _fields):
+            label(_label), instruction(_instruction), fields(_fields) {}
+
+        string label;
+        string instruction;
+        vector<string> fields;
+    };
+
+    private:
+        vector<string> _as;
+        vector<Instruction> _ins;
+        map<string, size_t> _label_table;
+        vector<mc_t> _mc;
+
+        set<string> _INS;
+        set<string> _R_INS;
+        set<string> _I_INS;
+        set<string> _J_INS;
+        set<string> _O_INS;
+        set<string> _PSEUDO_INS;
+
+        inline int interpreOffsetField(const string &field,
+                bool *pLabelSign = 0, bool half_word = true);
+
+        inline mc_t translateAdd(const Instruction &ins);
+        inline mc_t translateNand(const Instruction &ins);
+        inline mc_t translateLw(const Instruction &ins);
+        inline mc_t translateSw(const Instruction &ins);
+        inline mc_t translateBeq(const Instruction &ins, size_t pc);
+        inline mc_t translateJalr(const Instruction &ins);
+        inline mc_t translateHalt(const Instruction &ins);
+        inline mc_t translateNoop(const Instruction &ins);
+        inline mc_t translateDotFill(const Instruction &ins);
+
+        inline static mc_t convertRegisterField(const string &field);
+
+    public:
+        Assembler();
+        void setAssembly(const vector<string> &as);
+        void synAnalyse();
+        void passOne();
+        void passTwo();
+        vector<mc_t> getMechineCode();
+};
+\end{minted}
+
+\end{document}

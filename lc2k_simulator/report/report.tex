@@ -1,0 +1,72 @@
+\documentclass[a4paper]{article}
+
+\usepackage[top=1.2in, bottom=1.2in, left=1in, right=1in]{geometry}
+\usepackage{graphicx, minted}
+\usepackage[T1]{fontenc}
+
+\usemintedstyle{tango}
+
+\title{LC2K Simulator}
+\author{Rijun Cai\\12348003}
+
+\begin{document}
+\maketitle
+
+In this laboratory, an LC2K simulator is implemented in C++. This is a brief introduction of
+my source code.
+
+The main part of my program is the \verb|LC2KMachine| class. The definition of it is as follow.
+\begin{minted}{cpp}
+class LC2KMachine
+{
+    public:
+        static const size_t NUMMEMORY = 65536;
+        static const size_t NUMREGS = 8;
+
+    private:
+        size_t _mem_size, _pc;
+        bool _ready;
+        word_t _registers[NUMREGS];
+        word_t *_memory;
+
+        inline void handleAdd(mc_t mc);
+        inline void handleNand(mc_t mc);
+        inline void handleLw(mc_t mc);
+        inline void handleSw(mc_t mc);
+        inline void handleBeq(mc_t mc);
+        inline void handleJalr(mc_t mc);
+        inline void handleHalt();
+        inline void handleNoop();
+
+        int interpretOffset(mc_t mc)
+        {
+            mc_t offset = mc & 0xffff;
+            return (offset & 0x8000) ? offset - 0x10000 : offset;
+        }
+
+    public:
+        LC2KMachine(): _memory(new word_t[NUMMEMORY]), _ready(false) {}
+        ~LC2KMachine()
+        {
+            if(_memory)
+                delete [] _memory;
+        }
+
+        void next();
+        void setMachineCode(std::vector<word_t> mc);
+        void printState(std::ostream &os = std::cout);
+        void printInitMem(std::ostream &os = std::cout);
+};
+\end{minted}
+
+The public function \verb|LC2KMachine.setMachineCode()| is used to install an LC2K program into the simulator.
+It will write the program into the memory of the simulator.
+
+\verb|LC2KMachine.next()| function accepts no argument. It will execute the \emph{current} instruction in the
+memory and move the program counter to the next instruction to be executed. It will get an instruction from
+the memory and decode it, then invoke the needed instruction handler functions (\verb|LC2KMachine.handle*()|)
+to execute the instruction.
+
+\verb|LC2KMachine.printState()| and \verb|LC2KMachine.printInitMem()| functions are used to output the state
+of the simulator.
+\end{document}
