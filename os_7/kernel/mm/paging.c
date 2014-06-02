@@ -105,7 +105,7 @@ void free_page_structure(uint32_t *page_dir)
 {
     uint16_t idx, i;
     uint32_t *page_table;
-    for(idx = 1; idx < 1024; ++idx) { /* start from 1 to skip the kernel page table */
+    for(idx = 2; idx < 1024; ++idx) { /* start from 2 to skip the kernel space */
         if(page_dir[idx] & 0x1) {
             page_table = (uint32_t *)(page_dir[idx] & 0xfffff000);
             for(i = 0; i < 1024; ++i) {
@@ -160,9 +160,7 @@ void _page_fault(uint32_t addr, uint32_t errcode)
         vir_pn = PT_NUM_ADDR(addr);
         page_table = (uint32_t *)(CURRENT_TASK->page_dir[PD_IDX(vir_pn)] & 0xfffff000);
         phy_pn = page_table[PT_IDX(vir_pn)] >> 12;
-        if(phy_mem_rc[phy_pn] <= 1) {
-            page_table[PT_IDX(vir_pn)] |= 0x2;  /* write enable */
-        } else {
+        if(phy_mem_rc[phy_pn] > 1) {
             memcpy(PAGE_CPY_TMP, (void *)addr, 4096);
             dec_page_ref(phy_pn);
             phy_pn = alloc_phy_page(1024, max_page_num);
@@ -170,5 +168,6 @@ void _page_fault(uint32_t addr, uint32_t errcode)
             page_table[PT_IDX(vir_pn)] |= phy_pn << 12;
             memcpy((void *)addr, PAGE_CPY_TMP, 4096);
         }
+        page_table[PT_IDX(vir_pn)] |= 0x2;  /* write enable */
     }
 }

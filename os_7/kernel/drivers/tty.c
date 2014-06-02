@@ -5,6 +5,7 @@
 #include "keyboard.h"
 #include "keyboard_map.h"
 #include "scheduler.h"
+#include "interrupts.h"
 #include "utils.h"
 
 #define _V(x, y) vbuf[(x) + (y) * TTY_WIDTH]
@@ -107,6 +108,7 @@ void tty_clear(struct TTY_t *tty)
 
 void scoll_up(struct TTY_t *tty, uint8_t num)
 {
+    cli();
     int8_t x, y;
     for(y = num; y < TTY_HEIGHT; ++y) {
         for(x = 0; x < TTY_WIDTH; ++x)
@@ -114,6 +116,7 @@ void scoll_up(struct TTY_t *tty, uint8_t num)
     }
     for(x = 0; x < TTY_WIDTH; ++x)
         _V(x, tty->cur_y) = 0x0700 | ' ';
+    sti();
 }
 
 void tty_move_cursor(struct TTY_t *tty, uint8_t x, uint8_t y)

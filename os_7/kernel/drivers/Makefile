@@ -25,4 +25,4 @@ depend:
 	$(NASM) $^ -o $@ $(NASMFLAGS)
 
 keyboard_map.o: keyboard_map.c ../include/keyboard_map.h
-tty.o: tty.c ../include/constants.h ../include/tty.h  ../include/constants.h ../include/keyboard.h ../include/keyboard_map.h  ../include/scheduler.h ../include/kernel.h ../include/tty.h  ../include/utils.h
+tty.o: tty.c ../include/constants.h ../include/tty.h  ../include/constants.h ../include/keyboard.h ../include/keyboard_map.h  ../include/scheduler.h ../include/kernel.h ../include/tty.h  ../include/interrupts.h ../include/keyboard.h ../include/utils.h
