@@ -57,7 +57,7 @@ static inline bool sem_init(sem_t *s, int val)
     return result;
 }
 
-static inline void sem_p(sem_t *s)
+static inline void sem_p(sem_t s)
 {
     __asm__ volatile(
         ".intel_syntax noprefix;"
@@ -67,7 +67,7 @@ static inline void sem_p(sem_t *s)
     );
 }
 
-static inline void sem_v(sem_t *s)
+static inline void sem_v(sem_t s)
 {
     __asm__ volatile(
         ".intel_syntax noprefix;"

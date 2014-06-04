@@ -1,2 +1,5 @@
 bochs*
 *.out
+*.o
+kernel.bin
+kernel.gz
