@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "mm.h"
 #include "utils.h"
+#include "fs.h"
 
 struct Task_t *CURRENT_TASK, *FOREGROUND_TASK, *task_list[MAX_PROCESS_NUM];
 struct TaskQueue_t ready, blocked;
@@ -272,7 +273,7 @@ uint16_t _sys_fork(uint32_t eip, uint32_t eflags, uint32_t ecx, uint32_t edx, ui
 
     /* allocate a new stack and copy the orignal one */
     uint32_t stack = alloc_phy_page(1024, max_page_num);
-    map_page(CURRENT_TASK->page_dir, 1024, stack, false, false, true);
+    map_page(CURRENT_TASK->page_dir, 1024, stack, false, true, true);
     memcpy((uint32_t *)0x400000, (uint32_t *)(0xfffff000), 4096);
     map_page(t->page_dir, 0xfffff, stack, false, true, true);
 
@@ -303,6 +304,29 @@ uint16_t _sys_fork(uint32_t eip, uint32_t eflags, uint32_t ecx, uint32_t edx, ui
 
     sti();
     return t->pid;
+}
+
+int sys_execve(int _filename, int _argv, int _envp)
+{
+    const char *filename = (const char *)_filename;
+    struct File_t program;
+    if(!open_file_path(filename, &program))
+        return -1;
+
+    size_t program_size = program.size, n_pages = ((program_size - 1) >> 12) + 1;
+    size_t i;
+    for(i = 0; i < n_pages; ++i)
+        map_page(CURRENT_TASK->page_dir,
+                (USERSPACE_START >> 12) + i, alloc_phy_page(1024, max_page_num),
+                false, false, true);
+    if(!read_file(&program, (void *)USERSPACE_START))
+        return -1;
+    CURRENT_TASK->sigint_handler = sigint_default;
+    __asm__ volatile (
+        "jmp *%0;"
+        ::"r"(USERSPACE_START):
+    );
+    return 0;
 }
 
 void _force_exit()
@@ -339,3 +363,14 @@ void sigint_default()
         farjmp(0, CURRENT_TASK->pid << 3);
     }
 }
+
+int sys_getpid(int _1, int _2, int _3)
+{
+    return CURRENT_TASK->pid;
+}
+
+int sys_getppid(int _1, int _2, int _3)
+{
+    return CURRENT_TASK->ppid;
+}
+

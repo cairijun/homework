@@ -9,6 +9,7 @@
 #include "mm.h"
 #include "tty.h"
 #include "syscalls.h"
+#include "floppy.h"
 
 struct G_DESC *GDT;
 
@@ -36,6 +37,7 @@ void kmain(void *mb_info)
     init_timer();
     init_kb();
     init_scheduler();
+    init_fdc();
 
     IDT[0x80] = make_int_desc(0x8, (uint32_t)syscalls);
     IDT[0x0e] = make_int_desc(0x8, (uint32_t)page_fault);
@@ -45,6 +47,7 @@ void kmain(void *mb_info)
     sh_task.sigint_handler = NULL;
     sh_task.tty = &sh_tty;
     sh_task.tss.eip = (uint32_t)sh_main;
+    strncpy(sh_task.working_dir, "/fd0/", 5);
     add_task(&sh_task);
 
     start_scheduler();

@@ -63,6 +63,22 @@ page_fault:
     call _page_fault
     iretd
 
+extern _syscalls
+global syscalls
+syscalls:
+    push ebx
+    push ecx
+    push edx
+    push esi
+    push edi
+    call _syscalls
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    iretd
+
 WRAP_INT_HANDLER inthandler20
 WRAP_INT_HANDLER inthandler21
-WRAP_INT_HANDLER syscalls
+WRAP_INT_HANDLER inthandler26

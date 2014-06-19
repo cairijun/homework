@@ -24,4 +24,4 @@ depend:
 %.o: %.asm
 	$(NASM) $^ -o $@ $(NASMFLAGS)
 
-scheduler.o: scheduler.c ../include/scheduler.h ../include/constants.h  ../include/syscalls.h ../include/kernel.h ../include/tty.h  ../include/constants.h ../include/interrupts.h ../include/keyboard.h  ../include/kernel.h ../include/timer.h ../include/mm.h  ../include/utils.h
+scheduler.o: scheduler.c ../include/scheduler.h ../include/constants.h  ../include/syscalls.h ../include/kernel.h ../include/tty.h  ../include/constants.h ../include/interrupts.h ../include/keyboard.h  ../include/kernel.h ../include/timer.h ../include/mm.h  ../include/utils.h ../include/fs.h

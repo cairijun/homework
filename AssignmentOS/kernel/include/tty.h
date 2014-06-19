@@ -18,6 +18,7 @@ size_t tty_write_with_color(struct TTY_t *tty, const char *buf, size_t len, uint
 size_t tty_read(struct TTY_t *tty, char *buf, size_t len);
 void tty_clear(struct TTY_t *tty);
 void tty_move_cursor(struct TTY_t *tty, uint8_t x, uint8_t y);
+int sys_tty_print(int _buf, int _color, int _1);
 
 static uint16_t * const vbuf = (uint16_t *)VBUF_ADDR;
 

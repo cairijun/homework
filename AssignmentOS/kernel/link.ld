@@ -16,6 +16,7 @@ SECTIONS
     {
         _START_OF_RODATA_ = .;
         *(.rodata)
+        *(.rodata.*)
         _END_OF_RODATA_ = .;
     }
 

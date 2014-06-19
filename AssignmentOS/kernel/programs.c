@@ -5,15 +5,11 @@
 #include "scheduler.h"
 #include "timer.h"
 #include "sys.h"
+#include "fs.h"
 
 unsigned int rng(unsigned int n)
 {
     return n * 1664525 + 1013904223;
-}
-
-void print_str(const char *buf, uint8_t color)
-{
-    tty_write_with_color(CURRENT_TASK->tty, buf, strlen(buf), color);
 }
 
 void itos(int n, char *buf)
@@ -37,58 +33,8 @@ void itos(int n, char *buf)
     buf[i] = '\0';
 }
 
-#define sleep_test(name, color)\
-void name()\
-{\
-    int i;\
-    unsigned int n = CLOCK;\
-    char time_str[8];\
-    for(i = 0; i < 10; ++i) {\
-        n = rng(n);\
-        itos(n % 3000, time_str);\
-        tty_write_with_color(CURRENT_TASK->tty, "I'm " #name " and I'll sleep for ", 26, color);\
-        tty_write_with_color(CURRENT_TASK->tty, time_str, strlen(time_str), color);\
-        tty_write_with_color(CURRENT_TASK->tty, " ms.\n", 5, color);\
-        sleep(n % 3000);\
-    }\
-    tty_write_with_color(CURRENT_TASK->tty, "I'm " #name " and I'm exiting now. Bye!\n", 33, color);\
-    _exit(0);\
-}
-
-sleep_test(P1, 0x8E);
-sleep_test(P2, 0xF1);
-sleep_test(P3, 0x3F);
-sleep_test(P4, 0x5A);
-
-void fork_test()
-{
-    uint16_t pid;
-    char pid_str[8];
-    itos(CURRENT_TASK->pid, pid_str);
-    print_str("Fork test\nMy PID is ", 0xE8);
-    print_str(pid_str, 0xE8);
-    print_str(".\nI'm going to fork now.\n", 0xE8);
-
-    pid = fork();
-    if(pid) {
-        itos(pid, pid_str);
-        print_str("Fork success. I'm the parent process.\n", 0xE8);
-        print_str("The PID of the child process is ", 0xE8);
-        print_str(pid_str, 0xE8);
-        print_str(".\nWait for the child process to exit to prevent it from becoming a zombie.\n", 0xE8);
-        wait(pid);
-        print_str("I'm the parent process and I'm exiting now. Bye!\n", 0xE8);
-    } else {
-        itos(CURRENT_TASK->ppid, pid_str);
-        print_str("I'm the child process.\nMy parent is ", 0x8E);
-        print_str(pid_str, 0x8E);
-        print_str(".\nI'm exiting now. Bye!\n", 0x8E);
-    }
-    _exit(0);
-}
-
-unsigned int BUF[10];
-size_t buf_size;
+volatile unsigned int BUF[10];
+volatile size_t buf_size;
 
 void semaphore_test()
 {
@@ -109,14 +55,14 @@ void semaphore_test()
 
             n = rng(n);
             itos(n % 1000, str_buf);
-            print_str("Producer: producing, it will take ", 0x07);
-            print_str(str_buf, 0x07);
-            print_str(" ms.\n", 0x07);
+            tty_print("Producer: producing, it will take ", 0x07);
+            tty_print(str_buf, 0x07);
+            tty_print(" ms.\n", 0x07);
             sleep(n % 1000);
             sem_p(buf_s);
             BUF[buf_size++] = n;
             sem_v(buf_s);
-            print_str("Producer: finished.\n", 0x07);
+            tty_print("Producer: finished.\n", 0x07);
 
             sem_v(empty_s);
         }
@@ -132,11 +78,49 @@ void semaphore_test()
             sem_v(full_s);
 
             itos(n, str_buf);
-            print_str("Consumer: got, consuming, it will take ", child_color);
-            print_str(str_buf, child_color);
-            print_str(" ms.\n", child_color);
+            tty_print("Consumer: got, consuming, it will take ", child_color);
+            tty_print(str_buf, child_color);
+            tty_print(" ms.\n", child_color);
             sleep(n);
-            print_str("Consumer: finished.\n", child_color);
+            tty_print("Consumer: finished.\n", child_color);
         }
     }
+}
+
+char read_buf[8192];
+
+void ls()
+{
+    struct File_t file;
+    file.location = 0;
+    file.type = DIRECTORY;
+    if(!open_dir_path(CURRENT_TASK->working_dir, &file))
+        _exit(-1);
+    do{
+        if(file.type == DIRECTORY)
+            tty_print(file.filename, 0x6);
+        else
+            tty_print(file.filename, 0x7);
+        tty_print("\n", 0x7);
+    }while(get_next_file(&file));
+    _exit(0);
+}
+
+void cat()
+{
+    char filename[64];
+    strncpy(filename, CURRENT_TASK->working_dir, 64);
+    size_t len = strlen(filename);
+    write(1, "Filename: ", 10);
+    if(read(0, filename + len, 64 - len)) {
+        if((len = read_file_path(filename, read_buf))) {
+            write(1, read_buf, len);
+        }
+        else {
+            tty_print("Unable to open file ", 0x0C);
+            tty_print(filename, 0x0C);
+            tty_print(".\n", 0x0C);
+        }
+    }
+    _exit(0);
 }

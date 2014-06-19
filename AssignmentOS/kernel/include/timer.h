@@ -21,7 +21,9 @@ struct TimerHeap_t {
 
 bool timer_heap_insert(struct Timer_t);
 bool timer_heap_pop();
-void sleep(uint32_t sec);
+void _sleep(uint32_t msec);
+int sys_sleep(int ms, int _1, int _2);
+int sys_clock(int _1, int _2, int _3);
 
 void init_timer();
 void _inthandler20();

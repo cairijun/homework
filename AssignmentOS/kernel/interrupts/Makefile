@@ -30,4 +30,4 @@ idt.o: idt.c ../include/kernel.h ../include/tty.h ../include/constants.h  ../inc
 keyboard.o: keyboard.c ../include/utils.h ../include/interrupts.h  ../include/kernel.h ../include/tty.h ../include/constants.h  ../include/keyboard.h ../include/scheduler.h ../include/syscalls.h  ../include/keyboard.h ../include/keyboard_map.h
 pic.o: pic.c ../include/interrupts.h ../include/kernel.h ../include/tty.h  ../include/constants.h ../include/keyboard.h ../include/utils.h
 timer.o: timer.c ../include/timer.h ../include/constants.h  ../include/utils.h ../include/scheduler.h ../include/syscalls.h  ../include/kernel.h ../include/tty.h ../include/interrupts.h  ../include/keyboard.h ../include/constants.h
-syscalls.o: syscalls.c ../include/syscalls.h ../include/constants.h  ../include/scheduler.h ../include/constants.h ../include/syscalls.h  ../include/kernel.h ../include/tty.h ../include/interrupts.h  ../include/keyboard.h
+syscalls.o: syscalls.c ../include/syscalls.h ../include/constants.h  ../include/scheduler.h ../include/constants.h ../include/syscalls.h  ../include/kernel.h ../include/tty.h ../include/interrupts.h  ../include/keyboard.h ../include/timer.h ../include/tty.h

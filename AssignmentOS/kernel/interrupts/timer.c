@@ -101,15 +101,26 @@ void timer_wakeup(uint16_t *pid_p)
     wake_up_pid(*pid_p);
 }
 
-void sleep(uint32_t msec)
+void _sleep(uint32_t msec)
 {
     struct Timer_t t;
     t.arg = &CURRENT_TASK->pid;
     t.handler = (timer_handler_t)timer_wakeup;
     t.interval = 0;
-    t.target_time = CLOCK + msec / 10;
+    t.target_time = CLOCK + (msec - 1) / 10 + 1;
     timer_heap_insert(t);
     pwait();
+}
+
+int sys_sleep(int ms, int _1, int _2)
+{
+    _sleep(ms);
+    return 0;
+}
+
+int sys_clock(int _1, int _2, int _3)
+{
+    return CLOCK;
 }
 
 #undef _W

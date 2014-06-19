@@ -7,7 +7,7 @@
 #include "kernel.h"
 #include "tty.h"
 
-enum Event{NONBLOCKED, KEYBOARD, WAIT_CHILD, WAIT_SEMAPHORE};
+enum Event{NONBLOCKED, KEYBOARD, WAIT_CHILD, WAIT_SEMAPHORE, WAIT_IRQ6};
 enum TaskStatus{RUNNING, READY, BLOCKED, ZOMBIE};
 typedef void (*signal_handler_t)();
 
@@ -54,15 +54,19 @@ struct Task_t
     _sem_t sem_list[SEM_PER_PROCESS];
     size_t sem_list_size;
     signal_handler_t sigint_handler;
+    uint8_t io_buf[512];
+    int io_buf_idx;
+    bool io_buf_valid;
+    char working_dir[65];
 };
 
 struct TaskQueue_t
 {
     struct Task_t *head, *tail;
-    size_t size;
+    volatile size_t size;
 };
 
-extern struct Task_t *CURRENT_TASK, *FOREGROUND_TASK;
+extern struct Task_t *CURRENT_TASK, *FOREGROUND_TASK, *task_list[MAX_PROCESS_NUM];
 
 void init_scheduler();
 void start_scheduler();
@@ -77,6 +81,9 @@ void wake_up_pid(uint16_t pid);
 int sys_exit(int code, int _1, int _2);
 uint16_t _sys_fork();
 int sys_wait(int pid, int _1, int _2);
+int sys_execve(int _filename, int _argv, int _envp);
+int sys_getpid(int _1, int _2, int _3);
+int sys_getppid(int _1, int _2, int _3);
 
 void init_task(struct Task_t *t, uint16_t cs, uint16_t ds, uint16_t ss);
 void add_task(struct Task_t *t);

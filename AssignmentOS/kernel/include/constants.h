@@ -13,4 +13,8 @@
 #define SEMAPHORE_NUM   256
 #define SEM_PER_PROCESS 16
 
+#define FDC_TIMEOUT     10000
+
+#define USERSPACE_START 0x40000000
+
 #endif

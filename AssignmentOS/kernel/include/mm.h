@@ -6,6 +6,8 @@
 #include "kernel.h"
 
 #define PT_NUM_ADDR(addr) (((uint32_t)addr) >> 12)
+#define PD_IDX(pn) (((pn) & 0xffc00) >> 10)
+#define PT_IDX(pn) ((pn) & 0x3ff)
 
 void enable_paging();
 void init_mm(uint32_t max_phy_byte);

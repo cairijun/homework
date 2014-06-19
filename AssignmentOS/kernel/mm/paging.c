@@ -5,9 +5,6 @@
 #include "mm.h"
 #include "scheduler.h"
 
-#define PD_IDX(pn) (((pn) & 0xffc00) >> 10)
-#define PT_IDX(pn) ((pn) & 0x3ff)
-
 uint32_t PAGE_CPY_TMP[1024];
 
 void enable_paging()
@@ -55,6 +52,13 @@ void map_kernel_page(uint32_t virt_page_num, uint32_t phy_page_num,
     page_table = (uint32_t *)(PAGE_DIR[pd_idx] & 0xfffff000);
     page_table[pt_idx] = make_pte(phy_page_num, global, user, read_write);
     ++phy_mem_rc[phy_page_num];
+    __asm__ volatile(
+        ".intel_syntax noprefix;"
+        "mov eax, cr3;"
+        "mov cr3, eax;"
+        ".att_syntax;"
+        :::"eax"
+    );
 }
 
 void map_page(uint32_t *page_dir, uint32_t virt_page_num, uint32_t phy_page_num,
@@ -74,6 +78,13 @@ void map_page(uint32_t *page_dir, uint32_t virt_page_num, uint32_t phy_page_num,
     page_table = (uint32_t *)(page_dir[pd_idx] & 0xfffff000);
     page_table[pt_idx] = make_pte(phy_page_num, global, user, read_write);
     ++phy_mem_rc[phy_page_num];
+    __asm__ volatile(
+        ".intel_syntax noprefix;"
+        "mov eax, cr3;"
+        "mov cr3, eax;"
+        ".att_syntax;"
+        :::"eax"
+    );
 }
 
 uint32_t make_pde(uint32_t pt_page_num, bool user, bool read_write)
@@ -125,7 +136,7 @@ uint32_t *clone_page_structure(uint32_t *src)
     map_kernel_page(PT_NUM_ADDR(page_dir), PT_NUM_ADDR(page_dir), true, false, true);
     memset(page_dir, 0, 4096);
     page_dir[0] = PAGE_DIR[0];
-    for(idx = 1; idx < 1023; ++idx) { /* skip kernel space and stack space */
+    for(idx = 2; idx < 1023; ++idx) { /* skip kernel space and stack space */
         if(src[idx] & 0x1) {
             src_page_table = (uint32_t *)(src[idx] & 0xfffff000);
             for(i = 0; i < 1024; ++i) {

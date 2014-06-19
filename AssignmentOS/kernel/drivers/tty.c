@@ -82,7 +82,7 @@ size_t tty_read(struct TTY_t *tty, char *buf, size_t len)
                     cont = false;
                     break;
                 case BACKSPACE:
-                    if(tty->cur_x) {
+                    if(tty->cur_x && i) {
                         buf[--i] = '\0';
                         if(tty->echo) {
                             tty_move_cursor(tty, tty->cur_x - 1, tty->cur_y);
@@ -95,6 +95,7 @@ size_t tty_read(struct TTY_t *tty, char *buf, size_t len)
             wait_event(KEYBOARD);
         }
     }
+    buf[i] = '\0';
     return i;
 }
 
@@ -130,6 +131,13 @@ void tty_move_cursor(struct TTY_t *tty, uint8_t x, uint8_t y)
     outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
     tty->cur_x = x;
     tty->cur_y = y;
+}
+
+int sys_tty_print(int _buf, int _color, int _1)
+{
+    if(_color == 0)
+        _color = 0x07;
+    return tty_write_with_color(CURRENT_TASK->tty, (const char *)_buf, strlen((const char *)_buf), _color);
 }
 
 #undef _V
