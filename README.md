@@ -1,7 +1,7 @@
-These are some of my course projects of *Programming*, *Computer Organization and Architecture*,
-*Operating System* and so on. I open them just for academic exchange, and **you are not allow to use any content in
-this repo as your own submission**. **It is also prohibited that make your own submission mainly
-based on mine.** Besides, all contents in this repo are under GNU General Public License.
+Here are some of my course projects of *C++ Programming*, *Computer Organization and Architecture*,
+*Operating System* and so on. I open-source them just to share ideas, and **you are not allowed to use any contents within
+this repo as your own submissions**. **It is also prohibited that making your own submissions mainly
+based on mine.** Besides, all contents within this repo are under GNU General Public License Version 3.
 
 
 > This program is free software: you can redistribute it and/or modify
